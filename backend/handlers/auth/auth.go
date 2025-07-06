@@ -1,12 +1,10 @@
 package auth
 
 import (
+	"formular/backend/utils"
 	"net/http"
-	"os"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt"
 )
 
 type User struct {
@@ -43,7 +41,6 @@ func HandleRegister(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "Пользователь создан"})
 }
 func HandleLogin(c *gin.Context) {
-	var jwtSecret = os.Getenv("JWT_SECRET")
 	var credentials struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -57,15 +54,11 @@ func HandleLogin(c *gin.Context) {
 	// Поиск пользователя
 	for _, user := range users {
 		if user.Email == credentials.Email && user.Password == credentials.Password {
-			// Создаём JWT токен
-			token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-				"sub": user.ID,
-				"exp": time.Now().Add(time.Hour * 24).Unix(),
-			})
 
-			// Подписываем токен
-			tokenString, _ := token.SignedString([]byte(jwtSecret))
-			c.JSON(http.StatusOK, gin.H{"token": tokenString})
+			tokenAccessString, _ := utils.GenerateAccessToken(user.ID, false)
+			tokenRefreshString, _ := utils.GenerateRefreshToken(user.ID, false)
+			c.SetCookie("refresh_token", tokenRefreshString, 60*60*24*7, "/", "127.0.0.1:8080", false, true)
+			c.JSON(http.StatusOK, gin.H{"token": tokenAccessString})
 			return
 		}
 	}

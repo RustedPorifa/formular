@@ -1,7 +1,7 @@
 package main
 
 import (
-	handlers "formular/backend/handlers"
+	auth "formular/backend/handlers/auth"
 	"log"
 	"net/http"
 
@@ -30,8 +30,8 @@ func main() {
 	router.GET("/contacts", contactHandler)
 	router.GET("/admin/dashboard", adminDashboardHandler)
 	router.GET("/loginform", loginHandler)
-	router.POST("/register", handlers.HandleRegister)
-	router.POST("/login", handlers.HandleLogin)
+	router.POST("/register", auth.HandleRegister)
+	router.POST("/login", auth.HandleLogin)
 	router.Run(":8080")
 }
 

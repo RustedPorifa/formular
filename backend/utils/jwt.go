@@ -13,8 +13,22 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func GenerateJWT(userID int, isAdmin bool) (string, error) {
+func GenerateAccessToken(userID int, isAdmin bool) (string, error) {
 	expirationTime := time.Now().Add(24 * time.Hour)
+	claims := &Claims{
+		UserID:  userID,
+		IsAdmin: isAdmin,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expirationTime),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+}
+
+func GenerateRefreshToken(userID int, isAdmin bool) (string, error) {
+	expirationTime := time.Now().Add(154 * time.Hour)
 	claims := &Claims{
 		UserID:  userID,
 		IsAdmin: isAdmin,

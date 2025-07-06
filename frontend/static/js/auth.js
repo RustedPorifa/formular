@@ -1,5 +1,8 @@
 // auth.js
 // Проверка доступности localStorage
+
+//const userData = await authFetch('/api/user/profile');
+
 function isLocalStorageAvailable() {
     try {
         const testKey = '__test__storage__';
@@ -137,9 +140,45 @@ function init() {
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
     setupFormSwitch();
     
-    // Назначение обработчиков форм
+
     document.getElementById('login-form').addEventListener('submit', login);
     document.getElementById('register-form').addEventListener('submit', register);
+}
+
+async function refreshToken() {
+  const refreshToken = localStorage.getItem('refresh_token');
+  
+  const response = await fetch('/api/auth/refresh', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ refresh_token: refreshToken })
+  });
+
+  const newTokens = await response.json();
+  localStorage.setItem('access_token', newTokens.access_token);
+  localStorage.setItem('refresh_token', newTokens.refresh_token);
+  return newTokens.access_token;
+}
+
+async function authFetch(url, options = {}) {
+  let token = localStorage.getItem('access_token');
+  
+  // Добавляем токен в запрос
+  options.headers = {
+    ...options.headers,
+    Authorization: `Bearer ${token}`
+  };
+
+  let response = await fetch(url, options);
+  
+  // Если токен протух
+  if (response.status === 401) {
+    token = await refreshToken(); // Обновляем
+    options.headers.Authorization = `Bearer ${token}`; // Обновляем токен
+    response = await fetch(url, options); // Повторяем запрос
+  }
+  
+  return response;
 }
 
 // Запуск инициализации после загрузки DOM
