@@ -61,16 +61,48 @@ function setupFormSwitch() {
     });
 }
 
-async function login(params) {
-    
-}
-async function register() {
-    const name = document.getElementById('name').value;
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
+async function login(event) {
+    event.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
 
     try {
-        const response = await fetch('http://localhost:8080/register', {
+        const response = await fetch('http://127.0.0.1:8080/login', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({email, password})
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message);
+        }
+
+        const data = await response.json();
+        localStorage.setItem('jwtToken', data.token);
+        alert('Успешный вход!');
+        // Перенаправление после входа
+        // window.location.href = "/dashboard.html";
+
+    } catch (error) {
+        alert(`Ошибка: ${error.message}`);
+    }
+}
+
+async function register(event) {
+    event.preventDefault();
+    const name = document.getElementById('register-name').value;
+    const email = document.getElementById('register-email').value;
+    const password = document.getElementById('register-password').value;
+    const confirmPassword = document.getElementById('confirm-password').value;
+    
+    if (password !== confirmPassword) {
+        alert('Пароли не совпадают');
+        return;
+    }
+
+    try {
+        const response = await fetch('http://127.0.0.1:8080/register', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({name, email, password})
@@ -82,71 +114,12 @@ async function register() {
         }
 
         alert('Регистрация успешна! Теперь войдите');
+        // Переключение на форму входа
+        document.getElementById('login-tab').click();
         
     } catch (error) {
         alert(`Ошибка: ${error.message}`);
     }
-}
-
-async function getProtectedData() {
-    try {
-        // Получаем токен из localStorage
-        const token = localStorage.getItem('jwtToken');
-        
-        const response = await fetch('http://localhost:8080/protected', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error('Доступ запрещен');
-        }
-
-        const data = await response.json();
-        console.log('Защищенные данные:', data);
-        
-    } catch (error) {
-        alert(`Ошибка: ${error.message}`);
-    }
-}
-
-// Валидация форм
-function setupFormValidation() {
-    const loginForm = document.getElementById('login-form');
-    const registerForm = document.getElementById('register-form');
-    
-    loginForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const email = document.getElementById('login-email').value;
-        const password = document.getElementById('login-password').value;
-        
-        if (email && password) {
-            // Здесь должна быть логика отправки данных
-            alert('Вход выполнен!');
-        } else {
-            alert('Пожалуйста, заполните все поля');
-        }
-    });
-    
-    registerForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const name = document.getElementById('register-name').value;
-        const email = document.getElementById('register-email').value;
-        const password = document.getElementById('register-password').value;
-        const confirmPassword = document.getElementById('confirm-password').value;
-        
-        if (name && email && password && confirmPassword) {
-            if (password === confirmPassword) {
-                // Здесь должна быть логика регистрации
-                alert('Регистрация успешна!');
-            } else {
-                alert('Пароли не совпадают');
-            }
-        } else {
-            alert('Пожалуйста, заполните все поля');
-        }
-    });
 }
 
 // Инициализация
@@ -163,11 +136,11 @@ function init() {
     // Обработчики событий
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
     setupFormSwitch();
-    setupFormValidation();
+    
+    // Назначение обработчиков форм
+    document.getElementById('login-form').addEventListener('submit', login);
+    document.getElementById('register-form').addEventListener('submit', register);
 }
 
 // Запуск инициализации после загрузки DOM
 document.addEventListener('DOMContentLoaded', init);
-document.getElementById('login-btn').addEventListener('click', login);
-document.getElementById('register-btn').addEventListener('click', register);
-document.getElementById('data-btn').addEventListener('click', getProtectedData);

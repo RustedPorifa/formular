@@ -1,7 +1,7 @@
 package main
 
 import (
-	godb "formular/backend/database"
+	handlers "formular/backend/handlers"
 	"log"
 	"net/http"
 
@@ -14,10 +14,10 @@ func main() {
 	if errLoading != nil {
 		log.Panic("Ошибка в инициализации .env: ", errLoading)
 	}
-	errDB := godb.InitDB()
-	if errDB != nil {
-		log.Panic(errDB)
-	}
+	//errDB := godb.InitDB()
+	//if errDB != nil {
+	//	log.Panic(errDB)
+	//}
 	router := gin.Default()
 
 	router.LoadHTMLGlob("frontend/templates/*/*")
@@ -29,7 +29,9 @@ func main() {
 	router.GET("/about", aboutHandler)
 	router.GET("/contacts", contactHandler)
 	router.GET("/admin/dashboard", adminDashboardHandler)
-	router.GET("loginform", loginHandler)
+	router.GET("/loginform", loginHandler)
+	router.POST("/register", handlers.HandleRegister)
+	router.POST("/login", handlers.HandleLogin)
 	router.Run(":8080")
 }
 
