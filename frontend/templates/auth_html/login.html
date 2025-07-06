@@ -1,0 +1,78 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="ru" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formular - Вход / Регистрация</title>
+    <link rel="stylesheet" href="/static/css/auth.css">
+</head>
+<body class="light">
+    <div class="container">
+        <div class="form-container">
+            <div class="logo">
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                </svg>
+                <span>Formular</span>
+            </div>
+            
+            <div class="form-toggle">
+                <button id="login-tab" class="active">Вход</button>
+                <button id="register-tab">Регистрация</button>
+            </div>
+            
+            <div class="form-wrapper">
+                <!-- Форма входа -->
+                <form id="login-form" class="auth-form active">
+                    <div class="input-group">
+                        <label for="login-email">Email</label>
+                        <input type="email" id="login-email" required>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="login-password">Пароль</label>
+                        <input type="password" id="login-password" required>
+                        <a href="#" class="forgot-password">Забыли пароль?</a>
+                    </div>
+                    
+                    <button type="submit" class="login-btn">Войти</button>
+                </form>
+                
+                <!-- Форма регистрации -->
+                <form id="register-form" class="auth-form">
+                    <div class="input-group">
+                        <label for="register-name">Имя</label>
+                        <input type="text" id="register-name" required>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="register-email">Email</label>
+                        <input type="email" id="register-email" required>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="register-password">Пароль</label>
+                        <input type="password" id="register-password" required>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="confirm-password">Подтверждение пароля</label>
+                        <input type="password" id="confirm-password" required>
+                    </div>
+                    
+                    <button type="submit" class="register-btn">Зарегистрироваться</button>
+                </form>
+            </div>
+            
+            <div class="theme-toggle" id="theme-toggle">
+                <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/auth.js"></script>
+</body>
+</html>
