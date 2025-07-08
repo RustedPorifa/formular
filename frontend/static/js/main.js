@@ -196,9 +196,23 @@ function init() {
     // Инициализация фильтров и карточек
     setupFilters();
     renderExamCards(examVariants);
-    
+    changeProfileButton();
     // Активная кнопка по умолчанию
     document.querySelector('.filter-button.all').classList.add('active');
+}
+
+async function changeProfileButton() {
+    if (isLocalStorageAvailable()) {
+        let jwt = localStorage.getItem("jwtToken");
+        console.log("JWT:", jwt);
+        if (jwt !== null) {
+            let button = document.getElementById("login-profile-button")
+            button.setAttribute('onclick', "document.location='profile")
+            button.textContent = "Профиль"
+        }
+    } else {
+        console.log("Local storage was blocked")
+    }
 }
 
 // Запуск инициализации после загрузки DOM

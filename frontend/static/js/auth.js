@@ -1,7 +1,7 @@
 // auth.js
 // Проверка доступности localStorage
 
-//const userData = await authFetch('/api/user/profile');
+
 
 function isLocalStorageAvailable() {
     try {
@@ -13,6 +13,8 @@ function isLocalStorageAvailable() {
         return false;
     }
 }
+
+
 
 // Переключение темы
 function toggleTheme() {
@@ -88,6 +90,7 @@ async function login(event) {
         // window.location.href = "/dashboard.html";
 
     } catch (error) {
+        console.error("Registration error:", error);
         alert(`Ошибка: ${error.message}`);
     }
 }
@@ -103,12 +106,16 @@ async function register(event) {
         alert('Пароли не совпадают');
         return;
     }
-
+    console.log(JSON.stringify({name, email, password}))
     try {
         const response = await fetch('http://127.0.0.1:8080/register', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({name, email, password})
+            body: JSON.stringify({
+                name: name,
+                mail: email,
+                password: password,
+            })
         });
 
         if (!response.ok) {
