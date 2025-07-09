@@ -66,7 +66,6 @@ func HandleRegister(c *gin.Context) {
 }
 
 func HandleLogin(c *gin.Context) {
-	// Получаем учетные данные
 	var credentials user.Credentials
 	if err := c.BindJSON(&credentials); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Неверные данные"})

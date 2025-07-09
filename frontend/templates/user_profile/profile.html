@@ -1,0 +1,180 @@
+<!-- profile.html -->
+<!DOCTYPE html>
+<html lang="ru" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль - Formular</title>
+    <link rel="stylesheet" href="/static/css/profile.css">
+</head>
+<body class="light">
+    <header>
+        <div class="container">
+            <div class="nav-bar">
+                <div class="logo">Formular</div>
+                <nav class="nav-links" id="desktop-nav">
+                    <a href="/" class="nav-link">Главная</a>
+                    <a href="#" class="nav-link">Варианты</a>
+                    <a href="#" class="nav-link">Результаты</a>
+                    <a href="#reference" class="nav-link">Справочник</a>
+                    <div class="auth-buttons">
+                    </div>
+                </nav>
+                <button class="mobile-menu-button" id="mobile-menu-toggle" aria-label="Открыть меню">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+            </div>
+            <div class="mobile-menu" id="mobile-menu">
+                <a href="index.html" class="nav-link">Главная</a>
+                <a href="#" class="nav-link active">Профиль</a>
+                <a href="kimege.html" class="nav-link">КИМ</a>
+                <a href="#reference" class="nav-link">Справочник</a>
+                <a href="#" class="nav-link">Результаты</a>
+                <a href="#" class="nav-link">Настройки</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Баннер профиля -->
+        <section class="profile-banner">
+            <div class="banner-content">
+                <div class="user-avatar">
+                    <svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14c-4.418 0-8 1.791-8 4v2h16v-2c0-2.209-3.582-4-8-4z" />
+                    </svg>
+                </div>
+                <div class="user-info">
+                    <h1 class="user-name" id="user-name"></h1>
+                    <p class="user-id" id="user-id"></p>
+                    <p class="user-email" id="user-email"></p>
+                </div>
+                <div class="user-actions">
+                    <button class="btn btn-secondary">Редактировать профиль</button>
+                    <button class="btn btn-primary">Выход</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Статистика -->
+        <section class="profile-stats">
+            <div class="stat-card">
+                <h3>Пройдено тестов</h3>
+                <p class="stat-number">18</p>
+            </div>
+            <div class="stat-card">
+                <h3>Средний балл</h3>
+                <p class="stat-number">78</p>
+            </div>
+            <div class="stat-card">
+                <h3>Лучший результат</h3>
+                <p class="stat-number">92</p>
+            </div>
+            <div class="stat-card">
+                <h3>Осталось до цели</h3>
+                <p class="stat-number">12 тестов</p>
+            </div>
+        </section>
+
+        <!-- Альбомы -->
+        <section class="albums">
+            <!-- Сделанные варианты -->
+            <div class="album-section">
+                <div class="album-header">
+                    <h2>Сделанные варианты</h2>
+                    <button class="btn btn-secondary">Смотреть все</button>
+                </div>
+                <div class="album-grid">
+                    <div class="variant-card done">
+                        <div class="card-header">
+                            <span class="variant-id">Вариант 1</span>
+                            <span class="variant-date">23.04.2023</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="progress-container">
+                                <div class="progress-bar" style="width: 85%"></div>
+                                <span class="progress-text">85%</span>
+                            </div>
+                            <p class="score">Баллы: 82/100</p>
+                        </div>
+                    </div>
+                    <div class="variant-card done">
+                        <div class="card-header">
+                            <span class="variant-id">Вариант 5</span>
+                            <span class="variant-date">15.04.2023</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="progress-container">
+                                <div class="progress-bar" style="width: 60%"></div>
+                                <span class="progress-text">60%</span>
+                            </div>
+                            <p class="score">Баллы: 65/100</p>
+                        </div>
+                    </div>
+                    <div class="variant-card done">
+                        <div class="card-header">
+                            <span class="variant-id">Вариант 7</span>
+                            <span class="variant-date">10.04.2023</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="progress-container">
+                                <div class="progress-bar" style="width: 95%"></div>
+                                <span class="progress-text">95%</span>
+                            </div>
+                            <p class="score">Баллы: 93/100</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Отложенные варианты -->
+            <div class="album-section">
+                <div class="album-header">
+                    <h2>Отложенные варианты</h2>
+                    <button class="btn btn-secondary">Смотреть все</button>
+                </div>
+                <div class="album-grid">
+                    <div class="variant-card saved">
+                        <div class="card-header">
+                            <span class="variant-id">Вариант 3</span>
+                            <button class="remove-saved">×</button>
+                        </div>
+                        <div class="card-body">
+                            <p class="saved-info">Дата сохранения: 05.04.2023</p>
+                            <button class="btn btn-primary w-full">Начать практику</button>
+                        </div>
+                    </div>
+                    <div class="variant-card saved">
+                        <div class="card-header">
+                            <span class="variant-id">Вариант 9</span>
+                            <button class="remove-saved">×</button>
+                        </div>
+                        <div class="card-body">
+                            <p class="saved-info">Дата сохранения: 01.04.2023</p>
+                            <button class="btn btn-primary w-full">Начать практику</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                    </svg>
+                    <span>Formular</span>
+                </div>
+                <div class="copyright">© 2025 Formular. Все права защищены.</div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/static/js/profile.js"></script>
+</body>
+</html>

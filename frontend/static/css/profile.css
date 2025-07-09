@@ -1,0 +1,373 @@
+/* profile.css */
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea, #764ba2);
+    --light-bg: #f9fafb;
+    --dark-bg: #111827;
+    --light-card: white;
+    --dark-card: #1f2937;
+    --accent-color: #4f46e5;
+    --easy-color: #4ade80;
+    --medium-color: #fbbf24;
+    --hard-color: #ef4444;
+}
+
+body.light {
+    background-color: var(--light-bg);
+    color: #111827;
+}
+
+body.dark {
+    background-color: var(--dark-bg);
+    color: #f9fafb;
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Навигация */
+.nav-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: bold;
+    font-size: 1.25rem;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.nav-links {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.nav-link {
+    color: #6b7280;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.nav-link.active {
+    color: var(--accent-color);
+}
+
+.nav-link:hover {
+    color: var(--accent-color);
+}
+
+.mobile-menu-button {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.mobile-menu {
+    display: none;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem 0;
+}
+
+.mobile-menu a {
+    color: #6b7280;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.mobile-menu a:hover {
+    color: var(--accent-color);
+}
+
+/* Баннер профиля */
+.profile-banner {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 2rem;
+    margin-top: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+body.dark .profile-banner {
+    background: #1f2937;
+}
+
+.banner-content {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: 2rem;
+    align-items: center;
+}
+
+.user-avatar {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent-color);
+    border-radius: 9999px;
+    color: white;
+}
+
+.user-info h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.user-meta {
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+}
+
+.user-email {
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.user-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Статистика */
+.profile-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+body.dark .stat-card {
+    background: #1f2937;
+    box-shadow: 0 1px 3px rgba(255, 255, 255, 0.05);
+}
+
+.stat-card h3 {
+    font-size: 1rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--accent-color);
+}
+
+/* Альбомы */
+.albums {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-bottom: 4rem;
+}
+
+.album-section {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+body.dark .album-section {
+    background: #1f2937;
+    box-shadow: 0 4px 6px rgba(255, 255, 255, 0.05);
+}
+
+.album-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.album-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.album-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Карточки вариантов */
+.variant-card {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s;
+}
+
+body.dark .variant-card {
+    background: #1f2937;
+    box-shadow: 0 1px 3px rgba(255, 255, 255, 0.05);
+}
+
+.variant-card:hover {
+    transform: translateY(-5px);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.variant-id {
+    font-weight: 600;
+    color: #111827;
+}
+
+.variant-date {
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.remove-saved {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    color: #ef4444;
+    cursor: pointer;
+    margin-left: 1rem;
+}
+
+.remove-saved:hover {
+    opacity: 0.7;
+}
+
+.progress-container {
+    position: relative;
+    height: 12px;
+    background: #e5e7eb;
+    border-radius: 9999px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.progress-bar {
+    height: 100%;
+    background: var(--accent-color);
+    border-radius: 9999px;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    position: absolute;
+    right: 0.5rem;
+    top: 0;
+    bottom: 0;
+    margin: auto 0;
+    font-size: 0.875rem;
+    color: white;
+    font-weight: 500;
+}
+
+.score {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #6b7280;
+}
+
+.saved-info {
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+/* Кнопки */
+.btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: 500;
+}
+
+.btn-primary {
+    background: var(--primary-gradient);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: scale(1.02);
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 2px solid var(--accent-color);
+    color: var(--accent-color);
+}
+
+.btn-secondary:hover {
+    background: var(--accent-color);
+    color: white;
+}
+
+/* Общие стили */
+h1, h2, h3 {
+    margin: 0;
+}
+
+h1 {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+}
+
+h2 {
+    font-size: 1.5rem;
+    line-height: 2rem;
+}
+
+@media (max-width: 768px) {
+    .banner-content {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .user-actions {
+        flex-direction: row;
+        justify-content: center;
+    }
+
+    .user-actions button {
+        flex: 1;
+    }
+
+    .album-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .album-header .btn {
+        width: 100%;
+    }
+}

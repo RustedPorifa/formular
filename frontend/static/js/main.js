@@ -207,7 +207,7 @@ async function changeProfileButton() {
         console.log("JWT:", jwt);
         if (jwt !== null) {
             let button = document.getElementById("login-profile-button")
-            button.setAttribute('onclick', "document.location='profile")
+            button.setAttribute('onclick', `document.location='/profile'`)
             button.textContent = "Профиль"
         }
     } else {

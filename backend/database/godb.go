@@ -309,7 +309,6 @@ func GetOrCreateVariant(ctx context.Context, title string) (int, error) {
 // UserExists проверяет существует ли пользователь с указанным ID
 func UserExists(ctx context.Context, userID string) (bool, error) {
 	query := `SELECT EXISTS(SELECT 1 FROM users WHERE id = @userID)`
-
 	var exists bool
 	err := pool.QueryRow(ctx, query, pgx.NamedArgs{"userID": userID}).Scan(&exists)
 
@@ -318,4 +317,71 @@ func UserExists(ctx context.Context, userID string) (bool, error) {
 	}
 
 	return exists, nil
+}
+
+// GetUserInfo возвращает информацию о пользователе по email
+func GetUserInfo(ctx context.Context, email string) (*user.UserInfo, error) {
+	query := `
+        SELECT 
+            u.name,
+            u.email,
+            u.role,
+            COUNT(ucv.variant_id) AS completed_count
+        FROM users u
+        LEFT JOIN user_completed_variants ucv ON u.id = ucv.user_id
+        WHERE u.email = @email
+        GROUP BY u.id, u.name, u.email, u.role
+    `
+
+	var info user.UserInfo
+	err := pool.QueryRow(ctx, query, pgx.NamedArgs{"email": email}).Scan(
+		&info.ID,
+		&info.Name,
+		&info.Email,
+		&info.Role,
+		&info.CompletedVariantsCount,
+	)
+
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, errors.New("user not found")
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user info: %w", err)
+	}
+
+	return &info, nil
+}
+
+// GetUserInfoByID возвращает информацию о пользователе по его ID
+func GetUserInfoByID(ctx context.Context, userID string) (*user.UserInfo, error) {
+	query := `
+        SELECT 
+            u.id,
+            u.name,
+            u.email,
+            u.role,
+            COUNT(ucv.variant_id) AS completed_count
+        FROM users u
+        LEFT JOIN user_completed_variants ucv ON u.id = ucv.user_id
+        WHERE u.id = @userID
+        GROUP BY u.id, u.name, u.email, u.role
+    `
+
+	var info user.UserInfo
+	err := pool.QueryRow(ctx, query, pgx.NamedArgs{"userID": userID}).Scan(
+		&info.ID,
+		&info.Name,
+		&info.Email,
+		&info.Role,
+		&info.CompletedVariantsCount,
+	)
+
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, errors.New("user not found")
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user info: %w", err)
+	}
+
+	return &info, nil
 }

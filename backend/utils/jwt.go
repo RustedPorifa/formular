@@ -46,6 +46,11 @@ func ValidateToken(tokenString string) (*Claims, error) {
 		return []byte(os.Getenv("JWT_SECRET")), nil
 	})
 
+	// Добавьте проверку на nil перед доступом к .Claims
+	if token == nil {
+		return nil, err
+	}
+
 	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
 		return claims, nil
 	}

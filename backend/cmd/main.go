@@ -3,6 +3,7 @@ package main
 import (
 	godb "formular/backend/database"
 	auth "formular/backend/handlers/auth"
+	"formular/backend/handlers/profile"
 	"log"
 	"net/http"
 
@@ -33,7 +34,8 @@ func main() {
 	router.GET("/loginform", loginHandler)
 	router.POST("/register", auth.HandleRegister)
 	router.POST("/login", auth.HandleLogin)
-	router.POST("/profile")
+	router.GET("/profile", HandleHtmlProfile)
+	router.POST("/getuserinfo", profile.HandleProfile)
 	router.Run(":8080")
 }
 
@@ -68,5 +70,11 @@ func contactHandler(c *gin.Context) {
 func adminDashboardHandler(c *gin.Context) {
 	c.HTML(http.StatusOK, "admin/dashboard.html", gin.H{
 		"Title": "Админ-панель",
+	})
+}
+
+func HandleHtmlProfile(c *gin.Context) {
+	c.HTML(http.StatusOK, "profile.html", gin.H{
+		"Title": "Профиль",
 	})
 }
