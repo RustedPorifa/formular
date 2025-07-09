@@ -8,12 +8,12 @@ import (
 )
 
 type Claims struct {
-	UserID  int  `json:"sub"`
-	IsAdmin bool `json:"admin"`
+	UserID  string `json:"sub"`
+	IsAdmin bool   `json:"admin"`
 	jwt.RegisteredClaims
 }
 
-func GenerateAccessToken(userID int, isAdmin bool) (string, error) {
+func GenerateAccessToken(userID string, isAdmin bool) (string, error) {
 	expirationTime := time.Now().Add(24 * time.Hour)
 	claims := &Claims{
 		UserID:  userID,
@@ -27,7 +27,7 @@ func GenerateAccessToken(userID int, isAdmin bool) (string, error) {
 	return token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 }
 
-func GenerateRefreshToken(userID int, isAdmin bool) (string, error) {
+func GenerateRefreshToken(userID string, isAdmin bool) (string, error) {
 	expirationTime := time.Now().Add(154 * time.Hour)
 	claims := &Claims{
 		UserID:  userID,

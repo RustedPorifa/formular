@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -28,6 +29,15 @@ func HandleRegister(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Пароль обязателен"})
 		return
 	}
+
+	var genErr error
+	newUser.ID, genErr = generateUUID()
+	if genErr != nil {
+		log.Printf("BindJSON error: %v", genErr)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "UUID не сформирован, попробуйте ещё раз"})
+		return
+	}
+	log.Printf("Generated user ID: %s", newUser.ID)
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newUser.Password), 14)
 	if err != nil {
@@ -49,15 +59,13 @@ func HandleRegister(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "Пользователь создан"})
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "Пользователь создан",
+		"user_id": newUser.ID,
+	})
 }
+
 func HandleLogin(c *gin.Context) {
-	println("---------------")
-	users, _ := godb.GetAllUsers(context.Background())
-	for _, u := range users {
-		println(u.Email, u.Password)
-	}
-	println("----------------")
 	// Получаем учетные данные
 	var credentials user.Credentials
 	if err := c.BindJSON(&credentials); err != nil {
@@ -71,7 +79,6 @@ func HandleLogin(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	// 1. Получаем пользователя по email
 	user, err := godb.GetUserByEmail(ctx, credentials.Email)
 	if err != nil {
 		log.Printf("User not found: %s", credentials.Email)
@@ -79,7 +86,6 @@ func HandleLogin(c *gin.Context) {
 		return
 	}
 
-	// 2. Сравниваем пароли
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(credentials.Password))
 	if err != nil {
 		log.Printf("Password mismatch for user: %s", credentials.Email)
@@ -87,7 +93,7 @@ func HandleLogin(c *gin.Context) {
 		return
 	}
 
-	// 3. Генерируем токены
+	// Генерируем токены
 	tokenAccessString, err := utils.GenerateAccessToken(user.ID, false)
 	if err != nil {
 		log.Printf("Token generation error: %v", err)
@@ -102,7 +108,23 @@ func HandleLogin(c *gin.Context) {
 		return
 	}
 
-	// 4. Устанавливаем куки и возвращаем токен
+	// Устанавливаем куки и возвращаем токен
 	c.SetCookie("refresh_token", tokenRefreshString, 60*60*24*7, "/", "127.0.0.1:8080", false, true)
-	c.JSON(http.StatusOK, gin.H{"token": tokenAccessString})
+	c.JSON(http.StatusOK, gin.H{
+		"token": tokenAccessString,
+		"user": gin.H{
+			"id":    user.ID,
+			"name":  user.Name,
+			"email": user.Email,
+			"role":  user.Role,
+		},
+	})
+}
+
+func generateUUID() (string, error) {
+	id, err := uuid.NewRandom()
+	if err != nil {
+		return "", err
+	}
+	return id.String(), nil
 }

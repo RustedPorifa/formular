@@ -16,16 +16,6 @@ import (
 
 var pool *pgxpool.Pool
 
-// User структура пользователя
-/*type User struct {
-	ID        int
-	Name      string
-	Email     string
-	Password  string
-	Role      string
-	Completed []int // Список ID выполненных вариантов
-}*/
-
 // InitDB инициализирует подключение к БД и выполняет миграции
 func InitDB() error {
 	// Формирование строки подключения из переменных окружения
@@ -89,24 +79,25 @@ func runMigrations(ctx context.Context) error {
 // AddUser добавляет нового пользователя
 func AddUser(ctx context.Context, user *user.User) error {
 	sql := `
-        INSERT INTO users (name, mail, password, role) 
-        VALUES (@name, @email, @password, @role) 
-        RETURNING id
+        INSERT INTO users (id, name, email, password, role) 
+        VALUES (@id, @name, @email, @password, @role)
     `
 
 	args := pgx.NamedArgs{
+		"id":       user.ID,
 		"name":     user.Name,
 		"email":    user.Email,
 		"password": user.Password,
 		"role":     user.Role,
 	}
 
-	return pool.QueryRow(ctx, sql, args).Scan(&user.ID)
+	_, err := pool.Exec(ctx, sql, args)
+	return err
 }
 
 // GetUserRole возвращает роль пользователя по email
 func GetUserRole(ctx context.Context, email string) (string, error) {
-	sql := `SELECT role FROM users WHERE mail = @email`
+	sql := `SELECT role FROM users WHERE email = @email`
 	var role string
 
 	err := pool.QueryRow(ctx, sql, pgx.NamedArgs{"email": email}).Scan(&role)
@@ -121,7 +112,7 @@ func GetUserRole(ctx context.Context, email string) (string, error) {
 func GetAllUsers(ctx context.Context) ([]user.User, error) {
 	// Запрос основных данных пользователей (без пароля)
 	query := `
-        SELECT id, name, mail, role 
+        SELECT id, name, email, role 
         FROM users
         ORDER BY id
     `
@@ -133,7 +124,7 @@ func GetAllUsers(ctx context.Context) ([]user.User, error) {
 	defer rows.Close()
 
 	// Собираем пользователей во временную карту для быстрого доступа
-	usersMap := make(map[int]*user.User)
+	usersMap := make(map[string]*user.User)
 	var users []*user.User
 
 	for rows.Next() {
@@ -163,7 +154,7 @@ func GetAllUsers(ctx context.Context) ([]user.User, error) {
     `
 
 	// Собираем ID пользователей для запроса
-	userIDs := make([]int, 0, len(usersMap))
+	userIDs := make([]string, 0, len(usersMap))
 	for id := range usersMap {
 		userIDs = append(userIDs, id)
 	}
@@ -176,7 +167,8 @@ func GetAllUsers(ctx context.Context) ([]user.User, error) {
 
 	// Добавляем варианты пользователям
 	for completedRows.Next() {
-		var userID, variantID int
+		var userID string
+		var variantID int
 		if err := completedRows.Scan(&userID, &variantID); err != nil {
 			return nil, fmt.Errorf("failed to scan completed variant: %w", err)
 		}
@@ -200,9 +192,9 @@ func VerifyCredentials(ctx context.Context, credentials user.Credentials) (bool,
 	// Запрашиваем только необходимые поля пользователя
 	var user user.User
 	query := `
-        SELECT id, name, mail, password, role 
+        SELECT id, name, email, password, role 
         FROM users 
-        WHERE mail = @email
+        WHERE email = @email
     `
 
 	err := pool.QueryRow(ctx, query, pgx.NamedArgs{"email": credentials.Email}).Scan(
@@ -231,8 +223,8 @@ func VerifyCredentials(ctx context.Context, credentials user.Credentials) (bool,
 // GetUserByEmail возвращает пользователя по email
 func GetUserByEmail(ctx context.Context, email string) (*user.User, error) {
 	sql := `
-		SELECT id, name, mail, password, role 
-		FROM users WHERE mail = @email
+		SELECT id, name, email, password, role 
+		FROM users WHERE email = @email
 	`
 	user := &user.User{}
 	err := pool.QueryRow(ctx, sql, pgx.NamedArgs{"email": email}).Scan(
@@ -258,7 +250,7 @@ func GetUserByEmail(ctx context.Context, email string) (*user.User, error) {
 }
 
 // AddCompletedVariant добавляет выполненный вариант для пользователя
-func AddCompletedVariant(ctx context.Context, userID, variantID int) error {
+func AddCompletedVariant(ctx context.Context, userID string, variantID int) error {
 	sql := `
 		INSERT INTO user_completed_variants (user_id, variant_id)
 		VALUES (@userID, @variantID)
@@ -275,7 +267,7 @@ func AddCompletedVariant(ctx context.Context, userID, variantID int) error {
 }
 
 // GetCompletedVariants возвращает список ID выполненных вариантов
-func GetCompletedVariants(ctx context.Context, userID int) ([]int, error) {
+func GetCompletedVariants(ctx context.Context, userID string) ([]int, error) {
 	sql := `
 		SELECT variant_id 
 		FROM user_completed_variants 
@@ -312,4 +304,18 @@ func GetOrCreateVariant(ctx context.Context, title string) (int, error) {
 	var id int
 	err := pool.QueryRow(ctx, sql, pgx.NamedArgs{"title": title}).Scan(&id)
 	return id, err
+}
+
+// UserExists проверяет существует ли пользователь с указанным ID
+func UserExists(ctx context.Context, userID string) (bool, error) {
+	query := `SELECT EXISTS(SELECT 1 FROM users WHERE id = @userID)`
+
+	var exists bool
+	err := pool.QueryRow(ctx, query, pgx.NamedArgs{"userID": userID}).Scan(&exists)
+
+	if err != nil {
+		return false, fmt.Errorf("failed to check user existence: %w", err)
+	}
+
+	return exists, nil
 }

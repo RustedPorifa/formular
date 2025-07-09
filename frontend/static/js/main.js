@@ -215,5 +215,9 @@ async function changeProfileButton() {
     }
 }
 
+async function GetProfile() {
+    
+}
+
 // Запуск инициализации после загрузки DOM
 document.addEventListener('DOMContentLoaded', init);

@@ -33,6 +33,7 @@ func main() {
 	router.GET("/loginform", loginHandler)
 	router.POST("/register", auth.HandleRegister)
 	router.POST("/login", auth.HandleLogin)
+	router.POST("/profile")
 	router.Run(":8080")
 }
 
