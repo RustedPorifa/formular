@@ -22,8 +22,7 @@ func HandleProfile(c *gin.Context) {
 	}
 
 	utilsClaims, claimErr := utils.ValidateToken(jwt.Token) // Теперь поле Token
-	println(utilsClaims.UserID, jwt.Token)
-	if claimErr != nil {
+	if claimErr != nil || utilsClaims == nil {
 		log.Printf("Validation error: %s", claimErr)
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Неверный токен"}) // 401 уместнее
 		return

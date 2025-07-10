@@ -41,6 +41,20 @@ func GenerateRefreshToken(userID string, isAdmin bool) (string, error) {
 	return token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 }
 
+func GenerateNewTokens(userID string, isAdmin bool) (accessToken string, refreshToken string, err error) {
+	accessToken, err = GenerateAccessToken(userID, isAdmin)
+	if err != nil {
+		return "", "", err
+	}
+
+	refreshToken, err = GenerateRefreshToken(userID, isAdmin)
+	if err != nil {
+		return "", "", err
+	}
+
+	return accessToken, refreshToken, nil
+}
+
 func ValidateToken(tokenString string) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(os.Getenv("JWT_SECRET")), nil

@@ -36,6 +36,7 @@ func main() {
 	router.POST("/login", auth.HandleLogin)
 	router.GET("/profile", HandleHtmlProfile)
 	router.POST("/getuserinfo", profile.HandleProfile)
+	router.POST("/refreshtokens", auth.HandleRefreshToken)
 	router.Run(":8080")
 }
 

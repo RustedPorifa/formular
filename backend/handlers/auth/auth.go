@@ -120,6 +120,39 @@ func HandleLogin(c *gin.Context) {
 	})
 }
 
+func HandleRefreshToken(c *gin.Context) {
+	refreshToken, err := c.Cookie("refresh_token")
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Refresh token отсутствует"})
+		return
+	}
+
+	// Валидируем токен
+	claims, err := utils.ValidateToken(refreshToken)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Неверный refresh token"})
+		return
+	}
+
+	// Генерируем новую пару токенов
+	accessToken, newRefreshToken, err := utils.GenerateNewTokens(claims.UserID, claims.IsAdmin)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка генерации токенов"})
+		return
+	}
+
+	// Обновляем куку с refresh token
+	c.SetCookie("refresh_token", newRefreshToken, 60*60*24*7, "/", "127.0.0.1:8080", false, true)
+
+	c.JSON(http.StatusOK, gin.H{
+		"access_token": accessToken,
+		"user": gin.H{
+			"id":    claims.UserID,
+			"admin": claims.IsAdmin,
+		},
+	})
+}
+
 func generateUUID() (string, error) {
 	id, err := uuid.NewRandom()
 	if err != nil {
