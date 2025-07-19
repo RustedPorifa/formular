@@ -8,7 +8,8 @@ async function fetchUserProfile(isRetry = false) {
         const response = await fetch('http://127.0.0.1:8080/getuserinfo', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+                //'Content-Type': 'application/json',
             },
             body: JSON.stringify({ token })
         });
@@ -87,6 +88,8 @@ async function loadUserProfile() {
         alert(`Ошибка: ${error.message}`);
     }
 }
+
+
 
 // Вызываем при загрузке страницы профиля
 document.addEventListener('DOMContentLoaded', loadUserProfile);

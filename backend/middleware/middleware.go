@@ -11,7 +11,6 @@ import (
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Логируем ВСЕ входящие заголовки
 		fmt.Printf("Запрос на %s\nЗаголовки: %+v\n", c.Request.URL, c.Request.Header)
 
 		authHeader := c.GetHeader("Authorization")

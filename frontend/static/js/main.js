@@ -178,7 +178,7 @@ function setupFilters() {
 }
 
 // Инициализация
-function init() {
+async function init() {
     // Проверка темы
     if (isLocalStorageAvailable()) {
         const savedTheme = localStorage.getItem('theme');
@@ -192,11 +192,11 @@ function init() {
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
     document.getElementById('mobile-theme-toggle').addEventListener('click', toggleTheme);
     document.getElementById('mobile-menu-toggle').addEventListener('click', toggleMobileMenu);
-    
+    document.getElementById("login-profile-button").addEventListener('click', GetProfile)
     // Инициализация фильтров и карточек
     setupFilters();
     renderExamCards(examVariants);
-    changeProfileButton();
+    await changeProfileButton();
     // Активная кнопка по умолчанию
     document.querySelector('.filter-button.all').classList.add('active');
 }
@@ -207,7 +207,10 @@ async function changeProfileButton() {
         console.log("JWT:", jwt);
         if (jwt !== null) {
             let button = document.getElementById("login-profile-button")
-            button.setAttribute('onclick', `document.location='/profile'`)
+            let attributes = button.attributes;
+            for (let i = attributes.length - 1; i >= 0; i--) {
+                button.removeAttribute(attributes[i].name);
+            }
             button.textContent = "Профиль"
         }
     } else {
@@ -216,7 +219,53 @@ async function changeProfileButton() {
 }
 
 async function GetProfile() {
-    
+    // Проверяем доступность localStorage
+    if (!isLocalStorageAvailable()) {
+        redirectToLogin();
+        return;
+    }
+
+    // Получаем JWT из localStorage
+    const jwt = localStorage.getItem("jwtToken");
+    if (!jwt) {
+        redirectToLogin();
+        return;
+    }
+
+    // 1. Сначала получаем данные пользователя
+    try {
+        const response = await fetch("/getuserinfo", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${jwt}`
+            }
+        });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                redirectToLogin();
+            } else {
+                console.error("Server error:", response.status);
+            }
+            return;
+        }
+
+        const profileData = await response.json();
+        
+        // 2. Сохраняем данные в sessionStorage
+        sessionStorage.setItem("profileData", JSON.stringify(profileData));
+        
+        // 3. Переходим на страницу профиля
+        window.location.href = '/profile';
+        
+    } catch (error) {
+        console.error("Error fetching profile:", error);
+        redirectToLogin();
+    }
+}
+
+function redirectToLogin() {
+    window.location.href = '/loginform';
 }
 
 // Запуск инициализации после загрузки DOM

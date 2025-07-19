@@ -4,6 +4,7 @@ import (
 	godb "formular/backend/database"
 	auth "formular/backend/handlers/auth"
 	"formular/backend/handlers/profile"
+	"formular/backend/middleware"
 	"log"
 	"net/http"
 
@@ -34,9 +35,17 @@ func main() {
 	router.GET("/loginform", loginHandler)
 	router.POST("/register", auth.HandleRegister)
 	router.POST("/login", auth.HandleLogin)
-	router.GET("/profile", HandleHtmlProfile)
+	router.GET("/test", testHandler)
+	/*router.GET("/profile", HandleHtmlProfile)
 	router.POST("/getuserinfo", profile.HandleProfile)
-	router.POST("/refreshtokens", auth.HandleRefreshToken)
+	router.POST("/refreshtokens", auth.HandleRefreshToken)*/
+	authorized := router.Group("/")
+	authorized.Use(middleware.AuthMiddleware())
+	{
+		authorized.GET("/profile", HandleHtmlProfile)
+		authorized.POST("/getuserinfo", profile.HandleProfile)
+		authorized.POST("/refreshtokens", auth.HandleRefreshToken)
+	}
 	router.Run(":8080")
 }
 
@@ -53,6 +62,10 @@ func homeHandler(c *gin.Context) {
 
 func loginHandler(c *gin.Context) {
 	c.HTML(http.StatusOK, "login.html", gin.H{})
+}
+
+func testHandler(c *gin.Context) {
+	c.HTML(http.StatusOK, "test.html", gin.H{})
 }
 
 func aboutHandler(c *gin.Context) {
