@@ -2,17 +2,45 @@ package auth
 
 import (
 	"context"
+	"errors"
 	godb "formular/backend/database"
 	user "formular/backend/models/userConfig"
-	"formular/backend/utils"
+	"formular/backend/utils/jwtconfigurator"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
+
+func HandleVerify(c *gin.Context) {
+	access_cookies, cookieErr := c.Cookie("acess_token")
+	if cookieErr != nil && errors.Is(cookieErr, http.ErrNoCookie) {
+		c.JSON(http.StatusUnauthorized, gin.H{"verify": "false"})
+		return
+	} else {
+		_, jwtErr := jwtconfigurator.ValidateAccessToken(access_cookies)
+		if jwtErr != nil && errors.Is(jwtErr, jwt.ErrTokenExpired) {
+			refresh_cookie, cookieErr := c.Cookie("refresh_token")
+			if cookieErr != nil {
+				c.JSON(http.StatusUnauthorized, gin.H{"verify": "false"})
+				return
+			}
+			new_access_token, createErr := jwtconfigurator.GenerateAccessTokenFromRefresh(refresh_cookie)
+			if createErr != nil {
+				c.JSON(http.StatusUnauthorized, gin.H{"verify": "false"})
+				return
+			}
+			c.SetCookie("refresh_token", new_access_token, 8*60*60, "/", "127.0.0.1:8080", false, true)
+		} else {
+			c.JSON(http.StatusUnauthorized, gin.H{"verify": "false"})
+			return
+		}
+	}
+}
 
 func HandleRegister(c *gin.Context) {
 	var newUser user.User
@@ -92,15 +120,14 @@ func HandleLogin(c *gin.Context) {
 		return
 	}
 
-	// Генерируем токены
-	tokenAccessString, err := utils.GenerateAccessToken(user.ID, false)
+	tokenAccessString, err := jwtconfigurator.GenerateAccessToken(user.ID, user.Email)
 	if err != nil {
 		log.Printf("Token generation error: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка генерации токена"})
 		return
 	}
 
-	tokenRefreshString, err := utils.GenerateRefreshToken(user.ID, false)
+	tokenRefreshString, err := jwtconfigurator.GenerateRefreshToken(user.ID)
 	if err != nil {
 		log.Printf("Refresh token generation error: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка генерации токена"})
@@ -128,14 +155,19 @@ func HandleRefreshToken(c *gin.Context) {
 	}
 
 	// Валидируем токен
-	claims, err := utils.ValidateToken(refreshToken)
+	claims, err := jwtconfigurator.ValidateRefreshToken(refreshToken)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Неверный refresh token"})
 		return
 	}
-
-	// Генерируем новую пару токенов
-	accessToken, newRefreshToken, err := utils.GenerateNewTokens(claims.UserID, claims.IsAdmin)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	user_info, dbErr := godb.GetUserInfoByID(ctx, claims.ID)
+	if dbErr != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Ошибка поиска пользователя в дб\n" + dbErr.Error()})
+		return
+	}
+	accessToken, newRefreshToken, err := jwtconfigurator.GenerateNewTokens(user_info.ID, user_info.Email)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка генерации токенов"})
 		return
@@ -147,8 +179,7 @@ func HandleRefreshToken(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"access_token": accessToken,
 		"user": gin.H{
-			"id":    claims.UserID,
-			"admin": claims.IsAdmin,
+			"id": claims.UserID,
 		},
 	})
 }

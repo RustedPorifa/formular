@@ -4,10 +4,6 @@ const closeMenu = document.getElementById('closeMenu');
 const settingsMenu = document.getElementById('settingsMenu');
 const overlay = document.getElementById('overlay');
 const themeToggle = document.getElementById('themeToggle');
-const authProfileBtn = document.getElementById('auth-profile-btn');
-
-
-
 
 // Открытие меню
 settingsBtn.addEventListener('click', () => {
@@ -39,7 +35,7 @@ const loadTheme = () => {
     }
 };
 
-// Переключение темы
+
 themeToggle.addEventListener('change', () => {
     if (themeToggle.checked) {
         document.body.classList.add('dark-theme');
@@ -50,36 +46,8 @@ themeToggle.addEventListener('change', () => {
     }
 });
 
-function init() {
-    loadTheme()
 
-}
-
-function changeProfileButton() {
-    let refreshToken = getCookie("access_token");
-    if (refreshToken !== "") {
-        authProfileBtn.textContent = "Профиль"
-        authProfileBtn.onclick="location.href='profile'"
-    } else {
-        authProfileBtn.onclick="location.href='loginform'"
-    }
-}
-
-function getCookie(name) {
-  const nameEQ = name + "=";
-  const ca = document.cookie.split(';');
-  for (let i = 0; i < ca.length; i++) {
-    let c = ca[i];
-    while (c.charAt(0) === ' ') c = c.substring(1, c.length); // Remove leading spaces
-    if (c.indexOf(nameEQ) === 0) {
-      return c.substring(nameEQ.length, c.length); // Return the cookie value
-    }
-  }
-  return null; // Return null if the cookie is not found
-}
-
-// Инициализация темы при загрузке
-window.addEventListener('DOMContentLoaded', init());
+window.addEventListener('DOMContentLoaded', loadTheme);
 
 // Закрытие меню при нажатии Esc
 document.addEventListener('keydown', (e) => {

@@ -3,7 +3,7 @@ package profile
 import (
 	"context"
 	godb "formular/backend/database"
-	"formular/backend/utils"
+	"formular/backend/utils/jwtconfigurator"
 	"log"
 	"net/http"
 	"strings"
@@ -29,7 +29,7 @@ func HandleProfile(c *gin.Context) {
 	tokenString := parts[1]
 
 	// Валидируем токен
-	claims, err := utils.ValidateToken(tokenString)
+	claims, err := jwtconfigurator.ValidateAccessToken(tokenString)
 	if err != nil || claims == nil {
 		log.Printf("Validation error: %s", err)
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
@@ -48,9 +48,8 @@ func HandleProfile(c *gin.Context) {
 
 	// Возвращаем JSON
 	c.JSON(http.StatusOK, gin.H{
-		"email":     userInfo.Email,
-		"name":      userInfo.Name,
-		"completed": userInfo.CompletedVariantsCount,
-		"role":      userInfo.Role,
+		"email": userInfo.Email,
+		"name":  userInfo.Name,
+		"role":  userInfo.Role,
 	})
 }

@@ -196,7 +196,6 @@ func GetUserInfo(ctx context.Context, email string) (*user.UserInfo, error) {
 		&info.Name,
 		&info.Email,
 		&info.Role,
-		&info.CompletedVariantsCount,
 	)
 
 	if errors.Is(err, pgx.ErrNoRows) {
@@ -230,7 +229,6 @@ func GetUserInfoByID(ctx context.Context, userID string) (*user.UserInfo, error)
 		&info.Name,
 		&info.Email,
 		&info.Role,
-		&info.CompletedVariantsCount,
 	)
 
 	if errors.Is(err, pgx.ErrNoRows) {

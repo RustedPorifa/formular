@@ -2,9 +2,7 @@ package main
 
 import (
 	godb "formular/backend/database"
-	auth "formular/backend/handlers/auth"
-	"formular/backend/handlers/profile"
-	"formular/backend/middleware"
+	"formular/backend/handlers/auth"
 	"log"
 	"net/http"
 
@@ -28,24 +26,8 @@ func main() {
 	router.Static("/static", "frontend/static")
 
 	// Роуты
+	router.GET("/api/isverified", auth.HandleVerify)
 	router.GET("/", homeHandler)
-	router.GET("/about", aboutHandler)
-	router.GET("/contacts", contactHandler)
-	router.GET("/admin/dashboard", adminDashboardHandler)
-	router.GET("/loginform", loginHandler)
-	router.POST("/register", auth.HandleRegister)
-	router.POST("/login", auth.HandleLogin)
-	router.GET("/test", testHandler)
-	/*router.GET("/profile", HandleHtmlProfile)
-	router.POST("/getuserinfo", profile.HandleProfile)
-	router.POST("/refreshtokens", auth.HandleRefreshToken)*/
-	authorized := router.Group("/")
-	authorized.Use(middleware.AuthMiddleware())
-	{
-		authorized.GET("/profile", HandleHtmlProfile)
-		authorized.POST("/getuserinfo", profile.HandleProfile)
-		authorized.POST("/refreshtokens", auth.HandleRefreshToken)
-	}
 	router.Run(":8080")
 }
 

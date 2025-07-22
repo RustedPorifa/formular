@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"fmt"
-	"formular/backend/utils"
+	"formular/backend/utils/jwtconfigurator"
 	"net/http"
 	"strings"
 
@@ -32,7 +32,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		tokenString := parts[1]
-		claims, err := utils.ValidateToken(tokenString)
+		claims, err := jwtconfigurator.ValidateAccessToken(tokenString)
 		if err != nil || claims == nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error":   "Неверный токен",
@@ -43,7 +43,6 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		// Добавляем информацию в контекст
 		c.Set("userID", claims.UserID)
-		c.Set("isAdmin", claims.IsAdmin)
 
 		// Продолжаем обработку
 		c.Next()

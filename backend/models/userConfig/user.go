@@ -1,5 +1,7 @@
+// Структуры для пользователя
 package user
 
+// Обычный профиль пользователя
 type User struct {
 	ID       string `json:"id"`
 	Name     string `json:"name"`
@@ -8,19 +10,21 @@ type User struct {
 	Role     string `json:"role"`
 }
 
+// Логин пользователя
 type Credentials struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
+// JWT токен пользователя
 type JwtToken struct {
 	Token string `json:"token"`
 }
 
+// Информация о пользователе для ДБ
 type UserInfo struct {
-	ID                     string
-	Name                   string // Имя пользователя
-	Email                  string // Почта пользователя
-	Role                   string // Роль пользователя
-	CompletedVariantsCount int    // Количество сделанных вариантов
+	ID    string
+	Name  string
+	Email string
+	Role  string
 }
