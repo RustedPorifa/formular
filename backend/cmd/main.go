@@ -22,12 +22,20 @@ func main() {
 	router := gin.Default()
 
 	router.LoadHTMLGlob("frontend/templates/*/*")
-
 	router.Static("/static", "frontend/static")
 
-	// Роуты
-	router.GET("/api/isverified", auth.HandleVerify)
+	// Роуты API
+	router.GET("/api/auth/check", auth.HandleAuthCheck)
+
+	// Роуты HTML-страниц
 	router.GET("/", homeHandler)
+	router.GET("/login", loginHandler)
+	router.GET("/test", testHandler)
+	router.GET("/about", aboutHandler)
+	router.GET("/contact", contactHandler)
+	router.GET("/admin", adminDashboardHandler)
+	router.GET("/profile", HandleHtmlProfile)
+
 	router.Run(":8080")
 }
 
