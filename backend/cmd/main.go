@@ -25,9 +25,9 @@ func main() {
 	router := gin.Default()
 
 	router.LoadHTMLGlob("frontend/templates/*/*")
-
 	router.Static("/static", "frontend/static")
 
+<<<<<<< HEAD
 	// Роуты
 	router.GET("/api/verify", auth.HandleVerify)
 	router.GET("/", homeHandler)
@@ -43,6 +43,21 @@ func main() {
 	authorizedGroup.Use(middleware.AuthMiddleware())
 	authorizedGroup.GET("/profile", HandleHtmlProfile)
 	router.Run(":5354")
+=======
+	// Роуты API
+	router.GET("/api/auth/check", auth.HandleAuthCheck)
+
+	// Роуты HTML-страниц
+	router.GET("/", homeHandler)
+	router.GET("/login", loginHandler)
+	router.GET("/test", testHandler)
+	router.GET("/about", aboutHandler)
+	router.GET("/contact", contactHandler)
+	router.GET("/admin", adminDashboardHandler)
+	router.GET("/profile", HandleHtmlProfile)
+
+	router.Run(":8080")
+>>>>>>> abc5e9f8188121da11397c4a876fd69e343bc5ad
 }
 
 func homeHandler(c *gin.Context) {
