@@ -5,6 +5,36 @@ const settingsMenu = document.getElementById('settingsMenu');
 const overlay = document.getElementById('overlay');
 const themeToggle = document.getElementById('themeToggle');
 
+async function checkAuthAndUpdateProfile() {
+    try {
+        const response = await fetch('/api/verify', {
+            method: 'GET',
+            credentials: 'include' // Важно для отправки cookies
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            if (data.verify === "true") {
+                updateProfileButton();
+            }
+        }
+    } catch (error) {
+        console.error('Ошибка при проверке аутентификации:', error);
+    }
+}
+
+// Обновление кнопки профиля
+function updateProfileButton() {
+    const authBtn = document.getElementById('auth-profile-btn');
+    if (!authBtn) return;
+
+
+    authBtn.onclick = function() {
+        window.location = '/user/profile';
+    };
+    authBtn.textContent = 'Профиль';
+}
+
 // Открытие меню
 settingsBtn.addEventListener('click', () => {
     settingsMenu.classList.add('open');
@@ -47,7 +77,10 @@ themeToggle.addEventListener('change', () => {
 });
 
 
-window.addEventListener('DOMContentLoaded', loadTheme);
+window.addEventListener('DOMContentLoaded', () => {
+    loadTheme();
+    checkAuthAndUpdateProfile(); // Добавлен вызов проверки аутентификации
+});
 
 // Закрытие меню при нажатии Esc
 document.addEventListener('keydown', (e) => {

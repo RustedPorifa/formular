@@ -17,26 +17,30 @@ import (
 )
 
 func HandleVerify(c *gin.Context) {
-	access_cookies, cookieErr := c.Cookie("acess_token")
-	if cookieErr != nil && errors.Is(cookieErr, http.ErrNoCookie) {
+	access_cookies, cookieErr := c.Cookie("access_token")
+	if cookieErr != nil && !errors.Is(cookieErr, http.ErrNoCookie) {
+		println(cookieErr.Error())
 		c.JSON(http.StatusUnauthorized, gin.H{"verify": "false"})
 		return
-	} else {
+	} else if cookieErr == nil {
 		_, jwtErr := jwtconfigurator.ValidateAccessToken(access_cookies)
 		if jwtErr != nil && errors.Is(jwtErr, jwt.ErrTokenExpired) {
 			refresh_cookie, cookieErr := c.Cookie("refresh_token")
 			if cookieErr != nil {
+				println(cookieErr.Error())
 				c.JSON(http.StatusUnauthorized, gin.H{"verify": "false"})
 				return
 			}
 			new_access_token, createErr := jwtconfigurator.GenerateAccessTokenFromRefresh(refresh_cookie)
 			if createErr != nil {
+				println(createErr.Error())
 				c.JSON(http.StatusUnauthorized, gin.H{"verify": "false"})
 				return
 			}
-			c.SetCookie("refresh_token", new_access_token, 8*60*60, "/", "127.0.0.1:8080", false, true)
-		} else {
-			c.JSON(http.StatusUnauthorized, gin.H{"verify": "false"})
+			c.SetCookie("access_token", new_access_token, 8*60*60, "/", "127.0.0.1", false, true)
+		} else if jwtErr == nil {
+			println("else")
+			c.JSON(http.StatusAccepted, gin.H{"verify": "true"})
 			return
 		}
 	}
@@ -136,13 +140,11 @@ func HandleLogin(c *gin.Context) {
 
 	// Устанавливаем куки и возвращаем токен
 	c.SetCookie("refresh_token", tokenRefreshString, 60*60*24*7, "/", "127.0.0.1:8080", false, true)
+	c.SetCookie("access_token", tokenAccessString, 8*60*60, "/", "127.0.0.1:8080", false, true)
 	c.JSON(http.StatusOK, gin.H{
-		"token": tokenAccessString,
 		"user": gin.H{
-			"id":    user.ID,
-			"name":  user.Name,
-			"email": user.Email,
-			"role":  user.Role,
+			"id":   user.ID,
+			"name": user.Name,
 		},
 	})
 }

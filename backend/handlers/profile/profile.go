@@ -2,7 +2,7 @@ package profile
 
 import (
 	"context"
-	godb "formular/backend/database"
+	godb "formular/backend/database/SQL_postgre"
 	"formular/backend/utils/jwtconfigurator"
 	"log"
 	"net/http"

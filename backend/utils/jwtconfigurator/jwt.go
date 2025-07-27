@@ -3,7 +3,7 @@ package jwtconfigurator
 
 import (
 	"context"
-	godb "formular/backend/database"
+	godb "formular/backend/database/SQL_postgre"
 	jwtconfig "formular/backend/models/jwtConfig"
 	"os"
 	"time"

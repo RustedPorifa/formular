@@ -1,95 +1,131 @@
-async function fetchUserProfile(isRetry = false) {
-    try {
-        const token = localStorage.getItem('jwtToken');
-        if (!token) {
-            throw new Error('Токен не найден');
-        }
+// Элементы DOM
+const emailModal = document.getElementById('emailModal');
+const passwordModal = document.getElementById('passwordModal');
+const tariffsModal = document.getElementById('tariffsModal');
+const changeEmailBtn = document.getElementById('changeEmailBtn');
+const changePasswordBtn = document.getElementById('changePasswordBtn');
+const viewTariffsBtn = document.getElementById('viewTariffsBtn');
+const closeModalBtns = document.querySelectorAll('.close-modal');
+const logoutBtn = document.getElementById('logoutBtn');
+const settingsBtn = document.getElementById('settingsBtn');
 
-        const response = await fetch('http://127.0.0.1:8080/getuserinfo', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                //'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ token })
+// Открытие модальных окон
+changeEmailBtn.addEventListener('click', () => {
+    emailModal.classList.add('show');
+    document.body.classList.add('modal-open');
+});
+
+changePasswordBtn.addEventListener('click', () => {
+    passwordModal.classList.add('show');
+    document.body.classList.add('modal-open');
+});
+
+viewTariffsBtn.addEventListener('click', () => {
+    tariffsModal.classList.add('show');
+    document.body.classList.add('modal-open');
+});
+
+// Закрытие модальных окон
+closeModalBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.classList.remove('show');
         });
+        document.body.classList.remove('modal-open');
+    });
+});
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            // Добавляем статус в ошибку для последующей проверки
-            const error = new Error(`HTTP ${response.status}: ${errorText}`);
-            error.status = response.status;
-            throw error;
-        }
+// Закрытие по клику вне модального окна
+window.addEventListener('click', (e) => {
+    if (e.target.classList.contains('modal')) {
+        e.target.classList.remove('show');
+        document.body.classList.remove('modal-open');
+    }
+});
 
-        const userData = await response.json();
+// Обработка форм
+document.getElementById('emailForm')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const newEmail = document.getElementById('newEmail').value;
+    
+    // Обновляем email в профиле
+    document.getElementById('userEmail').textContent = newEmail;
+    
+    // Закрываем модальное окно
+    emailModal.classList.remove('show');
+    document.body.classList.remove('modal-open');
+    
+    // Показываем уведомление
+    alert('Email успешно изменен!');
+});
+
+document.getElementById('passwordForm')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    
+    // Проверка совпадения паролей
+    if (newPassword !== confirmPassword) {
+        alert('Пароли не совпадают!');
+        return;
+    }
+    
+    // Проверка сложности пароля
+    if (newPassword.length < 8) {
+        alert('Пароль должен содержать не менее 8 символов');
+        return;
+    }
+    
+    // Закрываем модальное окно
+    passwordModal.classList.remove('show');
+    document.body.classList.remove('modal-open');
+    
+    // Показываем уведомление
+    alert('Пароль успешно изменен!');
+});
+
+// Индикатор сложности пароля
+const passwordInput = document.getElementById('newPassword');
+if (passwordInput) {
+    passwordInput.addEventListener('input', function() {
+        const password = this.value;
+        const strengthBars = document.querySelectorAll('#passwordModal .strength-bar');
         
-        localStorage.setItem('userProfile', JSON.stringify({
-            id: userData.id,
-            name: userData.name,
-            email: userData.email,
-            role: userData.role,
-            completed: userData.completed
-        }));
+        // Сбрасываем все бары
+        strengthBars.forEach(bar => {
+            bar.style.background = '#e9ecef';
+            if (document.body.classList.contains('dark-theme')) {
+                bar.style.background = '#444';
+            }
+        });
         
-        return userData;
-    } catch (error) {
-        // Проверяем 401 ошибку и отсутствие предыдущей попытки
-        if (error.status === 401 && !isRetry) {
-            try {
-                console.log('Попытка обновления токена...');
-                await refreshToken(); // Обновляем токен
-                return fetchUserProfile(true); // Повторяем запрос с флагом isRetry
-            } catch (refreshError) {
-                console.error('Ошибка обновления токена:', refreshError);
-                throw refreshError;
+        // Проверяем сложность пароля
+        if (password.length > 0) {
+            strengthBars[0].style.background = 'var(--danger)';
+            
+            if (password.length >= 6) {
+                strengthBars[1].style.background = 'var(--warning)';
+            }
+            
+            if (password.length >= 8 && /[A-Z]/.test(password) && /[0-9]/.test(password)) {
+                strengthBars[2].style.background = 'var(--success)';
             }
         }
-        
-        // Все другие ошибки или повторная 401 ошибка
-        console.error('Ошибка:', error);
-        throw error;
-    }
+    });
 }
 
-async function refreshToken() {
-    try {
-        const response = await fetch('http://127.0.0.1:8080/refreshtokens', {
-            method: 'POST',
-            credentials: 'include'
-        });
-
-        if (!response.ok) {
-            throw new Error(`Ошибка ${response.status} при обновлении токена`);
-        }
-
-        const data = await response.json();
-        // Исправлено: единый ключ для токена
-        localStorage.setItem('jwtToken', data.access_token);
-        return data.access_token;
-    } catch (error) {
-        console.error("Refresh error:", error);
-        window.location.href = "/";
-        throw error;
+// Выход из аккаунта
+logoutBtn.addEventListener('click', () => {
+    if (confirm('Вы уверены, что хотите выйти из аккаунта?')) {
+        // Перенаправляем на главную страницу
+        window.location.href = 'index.html';
     }
-}
+});
 
-// Пример использования:
-async function loadUserProfile() {
-    try {
-        const profile = await fetchUserProfile();
-        console.log('Данные пользователя:', profile);
-        // Обновляем UI
-        document.getElementById('user-name').textContent = profile.name;
-        document.getElementById('user-email').textContent = profile.email;
-        // ... и т.д.
-    } catch (error) {
-        console.error('Не удалось загрузить профиль:', error);
-        alert(`Ошибка: ${error.message}`);
+// Инициализация темы
+document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-theme');
     }
-}
-
-
-
-// Вызываем при загрузке страницы профиля
-document.addEventListener('DOMContentLoaded', loadUserProfile);
+});

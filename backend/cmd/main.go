@@ -1,14 +1,17 @@
 package main
 
 import (
-	godb "formular/backend/database"
+	godb "formular/backend/database/SQL_postgre"
 	"formular/backend/handlers/auth"
+	"formular/backend/middleware"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
+
+var Domain string
 
 func main() {
 	errLoading := godotenv.Load("SECRETS.env")
@@ -26,9 +29,20 @@ func main() {
 	router.Static("/static", "frontend/static")
 
 	// Роуты
-	router.GET("/api/isverified", auth.HandleVerify)
+	router.GET("/api/verify", auth.HandleVerify)
 	router.GET("/", homeHandler)
-	router.Run(":8080")
+	router.GET("loginform", middleware.CSRFMiddleware(), loginHandler)
+	//csrf group for post
+	csrfGroup := router.Group("/api")
+	csrfGroup.Use(middleware.CSRFMiddleware())
+
+	csrfGroup.POST("/register", auth.HandleRegister)
+	csrfGroup.POST("/login", auth.HandleLogin)
+
+	authorizedGroup := router.Group("/user")
+	authorizedGroup.Use(middleware.AuthMiddleware())
+	authorizedGroup.GET("/profile", HandleHtmlProfile)
+	router.Run(":5354")
 }
 
 func homeHandler(c *gin.Context) {
