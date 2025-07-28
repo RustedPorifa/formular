@@ -9,6 +9,7 @@ import (
 
 	user "formular/backend/models/userConfig"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
@@ -239,4 +240,31 @@ func GetUserInfoByID(ctx context.Context, userID string) (*user.UserInfo, error)
 	}
 
 	return &info, nil
+}
+
+// CreateAnonymousUser создает временного анонимного пользователя
+func CreateAnonymousUser(ctx context.Context) (*user.User, error) {
+	id := uuid.New().String()
+	anonEmail := "anon_" + id + "@example.com"
+
+	sql := `
+        INSERT INTO users (id, name, email, password, role, is_authenticated)
+        VALUES (@id, 'Anonymous', @email, NULL, 'anonymous', false)
+        RETURNING id, name, email, role, is_authenticated
+    `
+
+	u := &user.User{}
+	err := pool.QueryRow(ctx, sql,
+		pgx.NamedArgs{
+			"id":    id,
+			"email": anonEmail,
+		}).Scan(
+		&u.ID,
+		&u.Name,
+		&u.Email,
+		&u.Role,
+		&u.IsAuthenticated,
+	)
+
+	return u, err
 }

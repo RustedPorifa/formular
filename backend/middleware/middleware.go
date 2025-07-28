@@ -2,14 +2,17 @@ package middleware
 
 import (
 	"errors"
+	"fmt"
 	csrfgenerator "formular/backend/utils/csrfGenerator"
 	"formular/backend/utils/jwtconfigurator"
 	"log"
+	"net"
 	"net/http"
 	"net/url"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/oschwald/geoip2-golang"
 )
 
 const (
@@ -123,6 +126,33 @@ func CSRFMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		c.Next()
+	}
+}
+
+func GeoIPMiddleware(db *geoip2.Reader) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		clientIP := net.ParseIP(c.ClientIP())
+		fmt.Println("Client IP:", clientIP)
+		if clientIP == nil {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Invalid IP"})
+			return
+		}
+
+		record, err := db.Country(clientIP)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "GeoIP lookup error"})
+			return
+		}
+		if record == nil || record.Country.IsoCode == "" {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Country IsoCode not found"})
+			return
+		}
+		fmt.Println("Client country:", record.Country.IsoCode)
+		if record.Country.IsoCode != "RU" {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+			return
+		}
 		c.Next()
 	}
 }

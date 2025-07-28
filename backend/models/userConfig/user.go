@@ -3,11 +3,12 @@ package user
 
 // Обычный профиль пользователя
 type User struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Role     string `json:"role"`
+	ID              string `json:"id"`
+	Name            string `json:"name"`
+	Email           string `json:"email"`
+	Password        string `json:"password"`
+	Role            string `json:"role"`
+	IsAuthenticated bool   `json:"is_authenticated"`
 }
 
 // Логин пользователя

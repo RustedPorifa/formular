@@ -85,18 +85,20 @@ func HandleRegister(c *gin.Context) {
 	}
 
 	newUser.Password = string(hashedPassword)
+	newUser.IsAuthenticated = false
 	log.Printf("Hashed password: %s", newUser.Password) // Логирование хеша
 
-	newUser.Role = "member"
+	newUser.Role = "Anonymous"
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	if err := godb.AddUser(ctx, &newUser); err != nil {
-		log.Printf("Database error: %v", err) // Детальное логирование ошибки БД
+		log.Printf("Database error: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка записи в БД"})
 		return
 	}
 
+	c.Redirect(http.StatusCreated, "/api/email/verify")
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "Пользователь создан",
 		"user_id": newUser.ID,
@@ -190,6 +192,10 @@ func HandleRefreshToken(c *gin.Context) {
 			"id": claims.UserID,
 		},
 	})
+}
+
+func HandleEmail(c *gin.Context) {
+
 }
 
 func generateUUID() (string, error) {
