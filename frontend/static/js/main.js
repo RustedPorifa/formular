@@ -5,10 +5,9 @@ const settingsMenu = document.getElementById('settingsMenu');
 const overlay = document.getElementById('overlay');
 const themeToggle = document.getElementById('themeToggle');
 
-<<<<<<< HEAD
 async function checkAuthAndUpdateProfile() {
     try {
-        const response = await fetch('/api/verify', {
+        const response = await fetch('/verify', {
             method: 'GET',
             credentials: 'include' // Важно для отправки cookies
         });
@@ -37,9 +36,6 @@ function updateProfileButton() {
 }
 
 // Открытие меню
-=======
-// Управление меню
->>>>>>> abc5e9f8188121da11397c4a876fd69e343bc5ad
 settingsBtn.addEventListener('click', () => {
     settingsMenu.classList.add('open');
     overlay.classList.add('visible');
@@ -107,7 +103,6 @@ function showAuthMessage() {
     }, 3000);
 }
 
-<<<<<<< HEAD
 window.addEventListener('DOMContentLoaded', () => {
     loadTheme();
     checkAuthAndUpdateProfile(); // Добавлен вызов проверки аутентификации
@@ -119,18 +114,8 @@ document.addEventListener('keydown', (e) => {
         settingsMenu.classList.remove('open');
         overlay.classList.remove('visible');
         document.body.classList.remove('menu-open');
-=======
-// Основная инициализация
-async function init() {
-    setupTheme();
-    
-    // Проверяем авторизацию только при загрузке страницы
-    const isAuthenticated = await checkAuth();
-    if (isAuthenticated) {
-        showAuthMessage();
->>>>>>> abc5e9f8188121da11397c4a876fd69e343bc5ad
     }
-}
+})
 
 // Запуск при полной загрузке DOM
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', init)

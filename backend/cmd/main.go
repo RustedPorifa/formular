@@ -1,6 +1,7 @@
 package main
 
 import (
+	nosqlredis "formular/backend/database/NOSQL_redis"
 	godb "formular/backend/database/SQL_postgre"
 	"formular/backend/handlers/auth"
 	"formular/backend/middleware"
@@ -22,19 +23,20 @@ func main() {
 	if errDB != nil {
 		log.Panic(errDB)
 	}
+	nosqlredis.InitRedis()
 	router := gin.Default()
 
 	router.LoadHTMLGlob("frontend/templates/*/*")
 	router.Static("/static", "frontend/static")
 
 	// Роуты
-	router.GET("/api/verify", auth.HandleVerify)
+	router.GET("/verify", auth.HandleVerify)
 	router.GET("/", homeHandler)
 	router.GET("loginform", middleware.CSRFMiddleware(), loginHandler)
 	//csrf group for post
 	csrfGroup := router.Group("/api")
 	csrfGroup.Use(middleware.CSRFMiddleware())
-
+	csrfGroup.POST("/verify")
 	csrfGroup.POST("/register", auth.HandleRegister)
 	csrfGroup.POST("/login", auth.HandleLogin)
 

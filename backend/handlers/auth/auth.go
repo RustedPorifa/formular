@@ -3,19 +3,25 @@ package auth
 import (
 	"context"
 	"errors"
-	godb "formular/backend/database"
+	"fmt"
+	godb "formular/backend/database/SQL_postgre"
 	user "formular/backend/models/userConfig"
 	"formular/backend/utils/jwtconfigurator"
 	"log"
+	"math/rand"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
-<<<<<<< HEAD
+func generateVerificationCode() string {
+	return fmt.Sprintf("%06d", rand.Intn(1000000))
+}
+
 func HandleVerify(c *gin.Context) {
 	access_cookies, cookieErr := c.Cookie("access_token")
 	if cookieErr != nil && !errors.Is(cookieErr, http.ErrNoCookie) {
@@ -41,38 +47,9 @@ func HandleVerify(c *gin.Context) {
 		} else if jwtErr == nil {
 			println("else")
 			c.JSON(http.StatusAccepted, gin.H{"verify": "true"})
-=======
-func HandleAuthCheck(c *gin.Context) {
-	access_cookies, cookieErr := c.Cookie("access_token")
-	refresh_cookie, cookieRefreshErr := c.Cookie("refresh_token")
-	if cookieErr == nil {
-		_, validErr := jwtconfigurator.ValidateAccessToken(access_cookies)
-		if validErr != nil {
-			handleNewAccessToken(c, refresh_cookie)
-		} else {
-			c.JSON(http.StatusOK, gin.H{"authenticated": "true"})
->>>>>>> abc5e9f8188121da11397c4a876fd69e343bc5ad
 			return
 		}
-
-	} else if errors.Is(cookieErr, http.ErrNoCookie) && cookieRefreshErr == nil {
-		handleNewAccessToken(c, refresh_cookie)
-	} else {
-		c.JSON(http.StatusUnauthorized, gin.H{"authenticated": "false"})
-		return
 	}
-}
-
-func handleNewAccessToken(c *gin.Context, refresh_cookie string) {
-	new_access_token, createErr := jwtconfigurator.GenerateAccessTokenFromRefresh(refresh_cookie)
-	if createErr != nil {
-		log.Println(createErr)
-		c.JSON(http.StatusUnauthorized, gin.H{"authenticated": "false"})
-		return
-	}
-	println(new_access_token)
-	c.SetCookie("access_token", new_access_token, 8*60*60, "/", "127.0.0.1:8080", false, true)
-	c.JSON(http.StatusAccepted, gin.H{"authenticated": "true"})
 }
 
 func HandleRegister(c *gin.Context) {

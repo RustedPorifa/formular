@@ -62,7 +62,7 @@ func Close() {
 // runMigrations выполняет SQL-миграции
 func runMigrations(ctx context.Context) error {
 	// Чтение файла миграции
-	migrationSQL, err := os.ReadFile("backend/database/migrate.sql")
+	migrationSQL, err := os.ReadFile("backend/database/migration/migrate.sql")
 	if err != nil {
 		return fmt.Errorf("read migration file: %w", err)
 	}
