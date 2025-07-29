@@ -45,10 +45,11 @@ func main() {
 	//csrf group for post
 	csrfGroup := router.Group("/api")
 	csrfGroup.Use(middleware.CSRFMiddleware())
-	csrfGroup.POST("/verify")
+	csrfGroup.GET("/verify-email", verifyHandler)
+	csrfGroup.POST("/verify/email", auth.HandleEmailVerify)
 	csrfGroup.POST("/register", auth.HandleRegister)
 	csrfGroup.POST("/login", auth.HandleLogin)
-	csrfGroup.POST("/email/verify", auth.HandleEmail)
+	csrfGroup.POST("/email/verify", auth.HandleEmailVerify)
 	authorizedGroup := router.Group("/user")
 	authorizedGroup.Use(middleware.AuthMiddleware())
 	authorizedGroup.GET("/profile", HandleHtmlProfile)
@@ -68,6 +69,10 @@ func homeHandler(c *gin.Context) {
 
 func loginHandler(c *gin.Context) {
 	c.HTML(http.StatusOK, "login.html", gin.H{})
+}
+
+func verifyHandler(c *gin.Context) {
+	c.HTML(http.StatusOK, "email.html", gin.H{})
 }
 
 func testHandler(c *gin.Context) {

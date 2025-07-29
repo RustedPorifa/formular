@@ -145,7 +145,7 @@ func VerifyCredentials(ctx context.Context, credentials user.Credentials) (bool,
 // GetUserByEmail возвращает пользователя по email
 func GetUserByEmail(ctx context.Context, email string) (*user.User, error) {
 	sql := `
-		SELECT id, name, email, password, role 
+		SELECT id, name, email, password, role, is_authenticated
 		FROM users WHERE email = @email
 	`
 	user := &user.User{}
@@ -155,6 +155,7 @@ func GetUserByEmail(ctx context.Context, email string) (*user.User, error) {
 		&user.Email,
 		&user.Password,
 		&user.Role,
+		&user.IsAuthenticated,
 	)
 
 	if err != nil {

@@ -4,12 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	nosqlredis "formular/backend/database/NOSQL_redis"
 	godb "formular/backend/database/SQL_postgre"
 	user "formular/backend/models/userConfig"
+	"formular/backend/utils/email"
 	"formular/backend/utils/jwtconfigurator"
 	"log"
 	"math/rand"
 	"net/http"
+	"net/url"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -17,6 +21,11 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
+
+type EmailVerify struct {
+	Code  string `json:"code"`
+	Email string `json:"email"`
+}
 
 func generateVerificationCode() string {
 	return fmt.Sprintf("%06d", rand.Intn(1000000))
@@ -87,7 +96,15 @@ func HandleRegister(c *gin.Context) {
 	newUser.Password = string(hashedPassword)
 	newUser.IsAuthenticated = false
 	log.Printf("Hashed password: %s", newUser.Password) // Логирование хеша
+	email_lower := strings.ToLower(newUser.Email)
 
+	code := generateVerificationCode()
+
+	redisErr := nosqlredis.Redidb.Set(c, "verification:code:"+email_lower, code, 10*time.Minute).Err()
+	if redisErr != nil {
+		c.JSON(500, gin.H{"error": "Ошибка Redis"})
+	}
+	email.SendEmail(newUser.Email, code)
 	newUser.Role = "Anonymous"
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -98,10 +115,10 @@ func HandleRegister(c *gin.Context) {
 		return
 	}
 
-	c.Redirect(http.StatusCreated, "/api/email/verify")
 	c.JSON(http.StatusCreated, gin.H{
-		"message": "Пользователь создан",
-		"user_id": newUser.ID,
+		"message":  "Регистрация успешна",
+		"email":    email_lower,
+		"redirect": "/api/verify-email?email=" + url.QueryEscape(email_lower),
 	})
 }
 
@@ -147,8 +164,8 @@ func HandleLogin(c *gin.Context) {
 	}
 
 	// Устанавливаем куки и возвращаем токен
-	c.SetCookie("refresh_token", tokenRefreshString, 60*60*24*7, "/", "127.0.0.1:8080", false, true)
-	c.SetCookie("access_token", tokenAccessString, 8*60*60, "/", "127.0.0.1:8080", false, true)
+	c.SetCookie("refresh_token", tokenRefreshString, 60*60*24*7, "/", "127.0.0.1", false, true)
+	c.SetCookie("access_token", tokenAccessString, 8*60*60, "/", "127.0.0.1", false, true)
 	c.JSON(http.StatusOK, gin.H{
 		"user": gin.H{
 			"id":   user.ID,
@@ -184,7 +201,7 @@ func HandleRefreshToken(c *gin.Context) {
 	}
 
 	// Обновляем куку с refresh token
-	c.SetCookie("refresh_token", newRefreshToken, 60*60*24*7, "/", "127.0.0.1:8080", false, true)
+	c.SetCookie("refresh_token", newRefreshToken, 60*60*24*7, "/", "127.0.0.1", false, true)
 
 	c.JSON(http.StatusOK, gin.H{
 		"access_token": accessToken,
@@ -194,7 +211,52 @@ func HandleRefreshToken(c *gin.Context) {
 	})
 }
 
-func HandleEmail(c *gin.Context) {
+func HandleEmailVerify(c *gin.Context) {
+	var VerifyInfo EmailVerify
+	if err := c.BindJSON(&VerifyInfo); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Неверные данные"})
+		return
+	}
+	println(VerifyInfo.Email, VerifyInfo.Code)
+	redi_code, rediErr := nosqlredis.GetVerificationCode(VerifyInfo.Email, c)
+	if rediErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка датабазы redis: " + rediErr.Error()})
+		return
+	}
+	println(redi_code)
+	if redi_code == VerifyInfo.Code {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		finded_user, dbErr := godb.GetUserByEmail(ctx, VerifyInfo.Email)
+		if dbErr != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка датабазы: " + dbErr.Error()})
+			return
+		}
+		finded_user.IsAuthenticated = true
+		finded_user.Role = "Member"
+		tokenAccessString, err := jwtconfigurator.GenerateAccessToken(finded_user.ID, finded_user.Email)
+		if err != nil {
+			log.Printf("Token generation error: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка генерации токена"})
+			return
+		}
+
+		tokenRefreshString, err := jwtconfigurator.GenerateRefreshToken(finded_user.ID)
+		if err != nil {
+			log.Printf("Refresh token generation error: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка генерации токена"})
+			return
+		}
+		c.SetCookie("refresh_token", tokenRefreshString, 60*60*24*7, "/", "127.0.0.1", false, true)
+		c.SetCookie("access_token", tokenAccessString, 8*60*60, "/", "127.0.0.1", false, true)
+		c.JSON(http.StatusCreated, gin.H{
+			"message":  "Регистрация успешна! Добро пожаловать!",
+			"redirect": "/",
+		})
+	} else {
+		c.JSON(400, gin.H{"error": "Неверный код авторизации"})
+		return
+	}
 
 }
 

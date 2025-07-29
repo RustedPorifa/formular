@@ -9,7 +9,7 @@ async function checkAuthAndUpdateProfile() {
     try {
         const response = await fetch('/verify', {
             method: 'GET',
-            credentials: 'include' // Важно для отправки cookies
+            credentials: 'include'
         });
 
         if (response.ok) {
@@ -104,8 +104,7 @@ function showAuthMessage() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-    loadTheme();
-    checkAuthAndUpdateProfile(); // Добавлен вызов проверки аутентификации
+    checkAuthAndUpdateProfile();
 });
 
 // Закрытие меню при нажатии Esc
@@ -116,6 +115,3 @@ document.addEventListener('keydown', (e) => {
         document.body.classList.remove('menu-open');
     }
 })
-
-// Запуск при полной загрузке DOM
-document.addEventListener('DOMContentLoaded', init)

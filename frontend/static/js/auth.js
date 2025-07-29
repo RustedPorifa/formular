@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
         button.textContent = 'Вход...';
 
         try {
-
+            console.log(getCookie('XSRF-TOKEN'));
             const response = await fetch('/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': getCookie('XSRF-TOKEN')},
@@ -132,16 +132,18 @@ document.addEventListener('DOMContentLoaded', function() {
         button.textContent = 'Регистрация...';
 
         try {
+            console.log(getCookie('XSRF-TOKEN'))
             const response = await fetch('/api/register', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': getCookie('XSRF-TOKEN')},
                 body: JSON.stringify({ name, email, password })
             });
 
             if (response.ok) {
-                // После регистрации переключаем на вход
-                document.querySelector('.tab[data-tab="login"]').click();
-                showSuccess('Регистрация успешна! Войдите в систему');
+                const data = await response.json();
+                if (data.redirect) {
+                    window.location.href = data.redirect;
+                }
             } else {
                 const data = await response.json();
                 showError(this, data.error || 'Ошибка регистрации');
@@ -154,7 +156,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Обработка социальных кнопок
     socialButtons.forEach(button => {
         button.addEventListener('click', function() {
             const provider = this.classList.contains('vk') ? 'VK' : 

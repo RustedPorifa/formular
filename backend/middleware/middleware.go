@@ -88,6 +88,7 @@ func CSRFMiddleware() gin.HandlerFunc {
 				c.Next()
 				return
 			} else {
+				println(csrfCookieErr.Error())
 				token, err := csrfgenerator.GenerateCSRFToken()
 				if err != nil {
 					c.AbortWithStatus(http.StatusInternalServerError)
