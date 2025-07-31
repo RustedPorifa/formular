@@ -12,13 +12,13 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"net/url"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgconn"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -104,21 +104,34 @@ func HandleRegister(c *gin.Context) {
 	if redisErr != nil {
 		c.JSON(500, gin.H{"error": "Ошибка Redis"})
 	}
-	email.SendEmail(newUser.Email, code)
+
 	newUser.Role = "Anonymous"
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	if err := godb.AddUser(ctx, &newUser); err != nil {
-		log.Printf("Database error: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка записи в БД"})
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			c.JSON(http.StatusConflict, gin.H{"error": "Такой пользователь уже существует!"})
+			return
+		} else {
+			log.Printf("Database error: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка записи в БД"})
+			return
+		}
+
+	}
+	go email.SendEmailToVerify(newUser.Email, code)
+	email_token, jwtErr := jwtconfigurator.CreateEmailVerificationToken(email_lower)
+	if jwtErr != nil {
+		log.Printf("JWT create err: %v", jwtErr)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка создания токена"})
 		return
 	}
-
 	c.JSON(http.StatusCreated, gin.H{
 		"message":  "Регистрация успешна",
 		"email":    email_lower,
-		"redirect": "/api/verify-email?email=" + url.QueryEscape(email_lower),
+		"redirect": "/api/verify-email?email=" + email_token,
 	})
 }
 
@@ -129,7 +142,6 @@ func HandleLogin(c *gin.Context) {
 		return
 	}
 
-	// Для отладки
 	log.Printf("Login attempt: Email=%s, Password=%s", credentials.Email, credentials.Password)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -217,8 +229,13 @@ func HandleEmailVerify(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Неверные данные"})
 		return
 	}
-	println(VerifyInfo.Email, VerifyInfo.Code)
-	redi_code, rediErr := nosqlredis.GetVerificationCode(VerifyInfo.Email, c)
+	user_email, parseErr := jwtconfigurator.VerifyEmailToken(VerifyInfo.Email)
+	if parseErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка верификации токена: " + parseErr.Error()})
+		return
+	}
+	println(VerifyInfo.Email, VerifyInfo.Code, user_email)
+	redi_code, rediErr := nosqlredis.GetVerificationCode(user_email, c)
 	if rediErr != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка датабазы redis: " + rediErr.Error()})
 		return
@@ -227,13 +244,14 @@ func HandleEmailVerify(c *gin.Context) {
 	if redi_code == VerifyInfo.Code {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
-		finded_user, dbErr := godb.GetUserByEmail(ctx, VerifyInfo.Email)
+		finded_user, dbErr := godb.GetUserByEmail(ctx, user_email)
 		if dbErr != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка датабазы: " + dbErr.Error()})
 			return
 		}
 		finded_user.IsAuthenticated = true
 		finded_user.Role = "Member"
+		println(finded_user.ID)
 		tokenAccessString, err := jwtconfigurator.GenerateAccessToken(finded_user.ID, finded_user.Email)
 		if err != nil {
 			log.Printf("Token generation error: %v", err)

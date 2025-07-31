@@ -26,41 +26,32 @@ func AuthMiddleware() gin.HandlerFunc {
 		if cookieErr != nil && errors.Is(cookieErr, http.ErrNoCookie) {
 			refresh_cookie, cookieErr := c.Cookie("refresh_token")
 			if cookieErr != nil {
-				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-					"error": "не найден refresh токен",
-				})
+				c.HTML(http.StatusUnauthorized, "401.html", gin.H{})
 				return
 			}
 			new_access_token, createErr := jwtconfigurator.GenerateAccessTokenFromRefresh(refresh_cookie)
 			if createErr != nil {
-				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-					"error": "Ошибка создания токена\n" + createErr.Error(),
-				})
+				c.HTML(http.StatusUnauthorized, "401.html", gin.H{})
+				return
 			}
 			c.SetCookie("access_token", new_access_token, 8*60*60, "/", "127.0.0.1", false, true)
 			c.Next()
 		} else if cookieErr != nil && !errors.Is(cookieErr, http.ErrNoCookie) {
 			log.Println(cookieErr)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"error": "Ошибка нахождения куки файлов, зарегестрируйтесь",
-			})
+			c.HTML(http.StatusUnauthorized, "401.html", gin.H{})
 			return
 		} else {
 			_, jwtErr := jwtconfigurator.ValidateAccessToken(access_cookies)
 			if jwtErr != nil && errors.Is(jwtErr, jwt.ErrTokenExpired) {
 				refresh_cookie, cookieErr := c.Cookie("refresh_token")
 				if cookieErr != nil {
-					c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-						"error": "не найден refresh токен",
-					})
+					c.HTML(http.StatusUnauthorized, "401.html", gin.H{})
 					return
 				}
 				new_access_token, createErr := jwtconfigurator.GenerateAccessTokenFromRefresh(refresh_cookie)
 				if createErr != nil {
 					log.Println(createErr)
-					c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-						"error": "Ошибка создания токена: " + createErr.Error(),
-					})
+					c.HTML(http.StatusUnauthorized, "401.html", gin.H{})
 					return
 				}
 				c.SetCookie("access_token", new_access_token, 8*60*60, "/", "127.0.0.1", false, true)
@@ -68,9 +59,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			} else if jwtErr == nil {
 				c.Next()
 			} else {
-				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-					"error": "Время авторизации истекло",
-				})
+				c.HTML(http.StatusUnauthorized, "401.html", gin.H{})
 				return
 			}
 		}

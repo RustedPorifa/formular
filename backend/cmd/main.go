@@ -1,13 +1,17 @@
 package main
 
 import (
+	"context"
 	nosqlredis "formular/backend/database/NOSQL_redis"
 	godb "formular/backend/database/SQL_postgre"
 	"formular/backend/handlers/auth"
 	"formular/backend/handlers/cloudflare"
 	"formular/backend/middleware"
+	"formular/backend/utils/email"
+	"formular/backend/utils/jwtconfigurator"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -17,7 +21,7 @@ import (
 var Domain string
 
 func main() {
-	cloudflare.InitSecret()
+
 	db, GeoErr := geoip2.Open("GeoLite.mmdb")
 	if GeoErr != nil {
 		log.Fatal(GeoErr)
@@ -27,16 +31,28 @@ func main() {
 	if errLoading != nil {
 		log.Panic("Ошибка в инициализации .env: ", errLoading)
 	}
+	jwtconfigurator.InitJWT()
+	cloudflare.InitSecret()
 	errDB := godb.InitDB()
 	if errDB != nil {
 		log.Panic(errDB)
 	}
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		godb.DeleteAllUnauthenticatedUsers(ctx)
+	}()
+	email.InitEmail()
 	nosqlredis.InitRedis()
 	router := gin.Default()
 	//router.Use(middleware.GeoIPMiddleware(db))
 	router.LoadHTMLGlob("frontend/templates/*/*")
 	router.Static("/static", "frontend/static")
 
+	//404
+	router.NoRoute(func(c *gin.Context) {
+		c.HTML(http.StatusNotFound, "404.html", gin.H{})
+	})
 	// Роуты
 	router.GET("/verify", auth.HandleVerify)
 	router.GET("/", homeHandler)
@@ -99,7 +115,18 @@ func adminDashboardHandler(c *gin.Context) {
 }
 
 func HandleHtmlProfile(c *gin.Context) {
+	access_token, cookieAccessErr := c.Cookie("access_token")
+	if cookieAccessErr != nil {
+		c.HTML(http.StatusUnauthorized, "401.html", gin.H{})
+	}
+	claims, jwtErr := jwtconfigurator.ValidateAccessToken(access_token)
+	if jwtErr != nil {
+		c.HTML(http.StatusUnauthorized, "401.html", gin.H{})
+	}
+	println(claims.ID)
 	c.HTML(http.StatusOK, "profile.html", gin.H{
 		"Title": "Профиль",
+		"Id":    claims.UserID,
+		"Email": claims.Email,
 	})
 }

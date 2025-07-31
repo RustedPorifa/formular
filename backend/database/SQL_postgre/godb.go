@@ -269,3 +269,38 @@ func CreateAnonymousUser(ctx context.Context) (*user.User, error) {
 
 	return u, err
 }
+
+// DeleteAllUnauthenticatedUsers удаляет всех неавторизованных пользователей и их связанные данные
+func DeleteAllUnauthenticatedUsers(ctx context.Context) (int64, error) {
+	tx, err := pool.Begin(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback(ctx) // Всегда пытаемся откатить при ошибке
+
+	deleteVariantsSQL := `
+        DELETE FROM user_completed_variants
+        WHERE user_id IN (
+            SELECT id FROM users WHERE is_authenticated = false
+        )
+    `
+	_, err = tx.Exec(ctx, deleteVariantsSQL)
+	if err != nil {
+		return 0, fmt.Errorf("failed to delete related variants: %w", err)
+	}
+
+	deleteUsersSQL := `
+        DELETE FROM users
+        WHERE is_authenticated = false
+    `
+	tag, err := tx.Exec(ctx, deleteUsersSQL)
+	if err != nil {
+		return 0, fmt.Errorf("failed to delete users: %w", err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return 0, fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return tag.RowsAffected(), nil
+}
