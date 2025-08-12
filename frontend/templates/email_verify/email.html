@@ -258,7 +258,6 @@
             </div>
             <h1>Подтверждение email</h1>
             <p>Мы отправили 6-значный код на вашу электронную почту</p>
-            <div class="email">user@example.com</div>
         </div>
         <div class="verification-content">
             <p>Пожалуйста, введите код подтверждения, который вы получили по электронной почте. Этот код действителен в течение <span class="timer" id="timer">05:00</span> минут.</p>
@@ -293,12 +292,6 @@
         const emailDisplay = document.querySelector('.verification-header .email');
         const verificationEmail = document.getElementById('verification-email');
         
-        // Получение email из URL
-        function getEmailFromUrl() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const email = urlParams.get('email');
-            return email ? decodeURIComponent(email) : null;
-        }
         
         // Инициализация страницы
         document.addEventListener('DOMContentLoaded', () => {

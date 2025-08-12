@@ -5,6 +5,7 @@ import (
 	"fmt"
 	csrfgenerator "formular/backend/utils/csrfGenerator"
 	"formular/backend/utils/jwtconfigurator"
+	"formular/backend/utils/tokenchecker"
 	"log"
 	"net"
 	"net/http"
@@ -83,13 +84,13 @@ func CSRFMiddleware() gin.HandlerFunc {
 					c.AbortWithStatus(http.StatusInternalServerError)
 					return
 				}
-
+				c.SetSameSite(http.SameSiteLaxMode)
 				c.SetCookie(
 					csrfCookieName,
 					token,
 					3600, // Время жизни
 					"/",
-					"",    // Домен (оставьте пустым для текущего домена)
+					"",
 					false, // Secure (только HTTPS)
 					false, // HttpOnly=false (чтобы JS мог прочитать)
 				)
@@ -117,6 +118,25 @@ func CSRFMiddleware() gin.HandlerFunc {
 		}
 
 		c.Next()
+	}
+}
+
+func AdminMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		user_info_db, usErr := tokenchecker.ValidateAccessTokenWithRefresh(c)
+		if usErr != nil {
+			log.Println(usErr)
+			c.Abort()
+			c.HTML(http.StatusUnauthorized, "403.html", gin.H{})
+			return
+		}
+		if user_info_db.Role == "Admin" {
+			c.Next()
+		} else {
+			c.HTML(http.StatusUnauthorized, "403.html", gin.H{})
+			c.Abort()
+			return
+		}
 	}
 }
 

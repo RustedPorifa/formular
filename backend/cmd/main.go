@@ -6,6 +6,9 @@ import (
 	godb "formular/backend/database/SQL_postgre"
 	"formular/backend/handlers/auth"
 	"formular/backend/handlers/cloudflare"
+	"formular/backend/handlers/kims"
+	"formular/backend/handlers/payments"
+	"formular/backend/handlers/upload"
 	"formular/backend/middleware"
 	"formular/backend/utils/email"
 	"formular/backend/utils/jwtconfigurator"
@@ -21,32 +24,46 @@ import (
 var Domain string
 
 func main() {
-
+	//APIs
+	errLoading := godotenv.Load("SECRETS.env")
+	if errLoading != nil {
+		log.Panic("Ошибка в инициализации .env: ", errLoading)
+	}
+	//GEO
 	db, GeoErr := geoip2.Open("GeoLite.mmdb")
 	if GeoErr != nil {
 		log.Fatal(GeoErr)
 	}
 	defer db.Close()
-	errLoading := godotenv.Load("SECRETS.env")
-	if errLoading != nil {
-		log.Panic("Ошибка в инициализации .env: ", errLoading)
-	}
+	//INIT BLOCK
 	jwtconfigurator.InitJWT()
 	cloudflare.InitSecret()
 	errDB := godb.InitDB()
 	if errDB != nil {
 		log.Panic(errDB)
 	}
+	email.InitEmail()
+	nosqlredis.InitRedis()
+	payments.InitRobokassa()
+	println("ADDING ADMIN")
+	adminErr := godb.AddAdmin()
+	if adminErr != nil {
+		log.Println(adminErr)
+	}
 	go func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		godb.DeleteAllUnauthenticatedUsers(ctx)
 	}()
-	email.InitEmail()
-	nosqlredis.InitRedis()
+	//Add admin
+
+	//BASED ROUTER
 	router := gin.Default()
+	//Настройка роутера
+	router.MaxMultipartMemory = 10 << 30
+	router.SetTrustedProxies(nil)
 	//router.Use(middleware.GeoIPMiddleware(db))
-	router.LoadHTMLGlob("frontend/templates/*/*")
+	router.LoadHTMLGlob("frontend/templates/**/*.html")
 	router.Static("/static", "frontend/static")
 
 	//404
@@ -58,7 +75,10 @@ func main() {
 	router.GET("/", homeHandler)
 	router.GET("loginform", middleware.CSRFMiddleware(), loginHandler)
 	router.GET("/submit", cloudflare.CloudflareHandler)
-	//csrf group for post
+	//KIMS group
+	variantsGroup := router.Group("/kims")
+	variantsGroup.GET("/:grade/:type", kims.HandleGrade)
+	//CSRF GROUP
 	csrfGroup := router.Group("/api")
 	csrfGroup.Use(middleware.CSRFMiddleware())
 	csrfGroup.GET("/verify-email", verifyHandler)
@@ -66,21 +86,27 @@ func main() {
 	csrfGroup.POST("/register", auth.HandleRegister)
 	csrfGroup.POST("/login", auth.HandleLogin)
 	csrfGroup.POST("/email/verify", auth.HandleEmailVerify)
+	//PAYMENT
+	paymentGroup := router.Group("/payment")
+	paymentGroup.Use(middleware.CSRFMiddleware())
+	paymentGroup.GET(":grade", payments.HandlePayment)
+	paymentGroup.POST("result")
+	paymentGroup.POST("success")
+	paymentGroup.POST("fail")
+	//AUTHORIZED ONLY
 	authorizedGroup := router.Group("/user")
 	authorizedGroup.Use(middleware.AuthMiddleware())
 	authorizedGroup.GET("/profile", HandleHtmlProfile)
-	router.Run(":5354")
+	//ADMIN ONLY
+	adminGroup := router.Group("/admin")
+	adminGroup.Use(middleware.AdminMiddleware())
+	adminGroup.GET("/dashboard", adminDashboardHandler)
+	adminGroup.POST("/upload-variants", upload.UploadHandler)
+	router.Run(":5050")
 }
 
 func homeHandler(c *gin.Context) {
-	c.HTML(http.StatusOK, "index.html", gin.H{
-		"Title": "Главная страница",
-		"Features": []string{
-			"Подготовка к ЕГЭ",
-			"Видеоуроки",
-			"Практические задания",
-		},
-	})
+	c.HTML(http.StatusOK, "index.html", gin.H{})
 }
 
 func loginHandler(c *gin.Context) {
@@ -107,11 +133,9 @@ func contactHandler(c *gin.Context) {
 	})
 }
 
-// Новый обработчик для админки
+// Обработчик дешборд администратора
 func adminDashboardHandler(c *gin.Context) {
-	c.HTML(http.StatusOK, "admin/dashboard.html", gin.H{
-		"Title": "Админ-панель",
-	})
+	c.HTML(http.StatusOK, "dashboard.html", gin.H{})
 }
 
 func HandleHtmlProfile(c *gin.Context) {

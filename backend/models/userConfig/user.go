@@ -3,12 +3,13 @@ package user
 
 // Обычный профиль пользователя
 type User struct {
-	ID              string `json:"id"`
-	Name            string `json:"name"`
-	Email           string `json:"email"`
-	Password        string `json:"password"`
-	Role            string `json:"role"`
-	IsAuthenticated bool   `json:"is_authenticated"`
+	ID              string   `json:"id"`
+	Name            string   `json:"name"`
+	Email           string   `json:"email"`
+	Password        string   `json:"password"`
+	Role            string   `json:"role"`
+	IsAuthenticated bool     `json:"is_authenticated"`
+	PurchasedGrades []string `json:"purchased_grades,omitempty"`
 }
 
 // Логин пользователя

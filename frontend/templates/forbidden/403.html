@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ошибка 403 - Доступ запрещён</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4a6fa5;
+            --secondary: #166088;
+            --accent: #ff6b6b;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #4a6fa5, #166088);
+            color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            overflow-x: hidden;
+        }
+        body.dark-theme {
+            background: linear-gradient(135deg, #1a3a5f, #0d3a56);
+        }
+        .error-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+        .error-content {
+            background: rgba(255, 255, 255, 0.92);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            padding: 50px;
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        body.dark-theme .error-content {
+            background: rgba(30, 30, 30, 0.92);
+        }
+        .error-content::before {
+            content: "";
+            position: absolute;
+            top: -50px;
+            left: -50px;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: rgba(74, 111, 165, 0.1);
+            z-index: -1;
+        }
+        .error-content::after {
+            content: "";
+            position: absolute;
+            bottom: -80px;
+            right: -60px;
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            background: rgba(255, 107, 107, 0.1);
+            z-index: -1;
+        }
+        .error-icon {
+            font-size: 120px;
+            margin-bottom: 30px;
+            color: var(--accent);
+            animation: pulse 2s infinite;
+        }
+        .error-code {
+            font-size: 120px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            line-height: 1;
+        }
+        .error-title {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        body.dark-theme .error-title {
+            color: #f0f0f0;
+        }
+        .error-message {
+            font-size: 20px;
+            margin-bottom: 30px;
+            color: var(--gray);
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+        .error-btn {
+            padding: 15px 35px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        .error-btn::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            transition: var(--transition);
+        }
+        .btn-home {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(74, 111, 165, 0.3);
+        }
+        .btn-home::before {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+        .btn-home:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(74, 111, 165, 0.5);
+        }
+        .btn-contact {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+        .btn-contact::before {
+            background: var(--primary);
+            opacity: 0;
+        }
+        .btn-contact:hover {
+            color: white;
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(74, 111, 165, 0.3);
+        }
+        .btn-contact:hover::before {
+            opacity: 1;
+        }
+        .math-elements {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+        .math-element {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: var(--primary);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            animation: float 6s infinite ease-in-out;
+        }
+        body.dark-theme .math-element {
+            background: rgba(30, 30, 30, 0.9);
+        }
+        .math-element:nth-child(2) {
+            animation-delay: 1s;
+            background: rgba(255, 255, 255, 0.85);
+            color: var(--accent);
+        }
+        .math-element:nth-child(3) {
+            animation-delay: 2s;
+            background: rgba(255, 255, 255, 0.8);
+            color: var(--secondary);
+        }
+        .math-element:nth-child(4) {
+            animation-delay: 3s;
+            background: rgba(255, 255, 255, 0.75);
+            color: var(--success);
+        }
+        body.dark-theme .math-element {
+            background: rgba(40, 40, 40, 0.9);
+        }
+        body.dark-theme .math-element:nth-child(2) {
+            background: rgba(45, 45, 45, 0.85);
+        }
+        body.dark-theme .math-element:nth-child(3) {
+            background: rgba(50, 50, 50, 0.8);
+        }
+        body.dark-theme .math-element:nth-child(4) {
+            background: rgba(55, 55, 55, 0.75);
+        }
+        /* Анимации */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        /* Footer */
+        footer {
+            background-color: rgba(0, 0, 0, 0.3);
+            color: white;
+            padding: 30px 0;
+            text-align: center;
+            margin-top: auto;
+        }
+        body.dark-theme footer {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            transition: var(--transition);
+            font-size: 18px;
+        }
+        .footer-links a:hover {
+            color: var(--accent);
+            text-decoration: underline;
+        }
+        .copyright {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-top: 20px;
+        }
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .error-content {
+                padding: 30px 20px;
+            }
+            .error-code {
+                font-size: 80px;
+            }
+            .error-title {
+                font-size: 28px;
+            }
+            .error-message {
+                font-size: 18px;
+            }
+            .btn-group {
+                flex-direction: column;
+                align-items: center;
+            }
+            .math-elements {
+                gap: 15px;
+            }
+            .math-element {
+                width: 60px;
+                height: 60px;
+                font-size: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-content">
+            <div class="error-icon">
+                <i class="fas fa-lock"></i>
+            </div>
+            <h1 class="error-code">401</h1>
+            <h2 class="error-title">Доступ запрещён</h2>
+            <p class="error-message">
+                Упс! Похоже, у вас нет разрешения для доступа к этой математической сокровищнице. 
+                Как уравнение с ограниченной областью определения, некоторые страницы требуют 
+                специальных прав доступа.
+            </p>
+            <div class="math-elements">
+                <div class="math-element">=</div>
+                <div class="math-element">≠</div>
+                <div class="math-element">≈</div>
+                <div class="math-element">→</div>
+            </div>
+            <div class="btn-group">
+                <a href="/" class="error-btn btn-home">
+                    <i class="fas fa-home"></i> На главную
+                </a>
+                <a href="#" class="error-btn btn-contact">
+                    <i class="fas fa-sign-in-alt"></i> Войти в аккаунт
+                </a>
+            </div>
+        </div>
+    </div>
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="#">Главная</a>
+                <a href="#">О проекте</a>
+                <a href="#">Тарифы</a>
+                <a href="#">Помощь</a>
+                <a href="#">Контакты</a>
+            </div>
+            <div class="copyright">
+                &copy; 2025 Formularka. Все права защищены. Математика для каждого.
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

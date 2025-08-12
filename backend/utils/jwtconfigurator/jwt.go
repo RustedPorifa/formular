@@ -26,7 +26,7 @@ func InitJWT() {
 // Создает access токен из resresh токена
 func GenerateAccessTokenFromRefresh(refreshToken string) (string, error) {
 
-	claims, err := ValidateAccessToken(refreshToken)
+	claims, err := ValidateRefreshToken(refreshToken)
 	if err != nil {
 		return "", err
 	}

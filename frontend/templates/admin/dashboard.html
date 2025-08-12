@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Formular - Администратор</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+        />
+        <link rel="stylesheet" href="/static/css/dashboard.css" />
+    </head>
+    <body>
+        <!-- Header -->
+        <header>
+            <div class="container">
+                <div class="header-container">
+                    <div class="logo-container">
+                        <div class="logo-icon">🧪</div>
+                        <div class="logo-text">Formular</div>
+                        <div class="admin-badge">Администратор</div>
+                    </div>
+                    <div class="admin-info">
+                        <div class="admin-name">Иван Петров</div>
+                        <div class="admin-avatar">ИП</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <!-- Main Content -->
+        <div class="container">
+            <div class="dashboard">
+                <!-- Sidebar -->
+                <div class="sidebar">
+                    <h2 class="sidebar-title">Панель управления</h2>
+                    <div class="nav-item active" data-section="upload">
+                        <i class="fas fa-upload"></i>
+                        <span>Загрузка вариантов</span>
+                    </div>
+                    <div class="nav-item" data-section="email">
+                        <i class="fas fa-envelope"></i>
+                        <span>Email рассылка</span>
+                    </div>
+                    <div class="nav-item">
+                        <i class="fas fa-book"></i>
+                        <span>Управление контентом</span>
+                    </div>
+                    <div class="nav-item">
+                        <i class="fas fa-users"></i>
+                        <span>Пользователи</span>
+                    </div>
+                    <div class="nav-item">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Выйти</span>
+                    </div>
+                </div>
+                <!-- Content -->
+                <div class="content">
+                    <div class="content-header">
+                        <h1 class="content-title" id="contentTitle">
+                            Массовая загрузка вариантов
+                        </h1>
+                        <div class="date-info">
+                            Сегодня: <span id="currentDate"></span>
+                        </div>
+                    </div>
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-file-pdf"></i>
+                            </div>
+                            <div class="stat-value">142</div>
+                            <div class="stat-label">Загружено PDF</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-video"></i>
+                            </div>
+                            <div class="stat-value">89</div>
+                            <div class="stat-label">Загружено видео</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-value">5,238</div>
+                            <div class="stat-label">Пользователей</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <div class="stat-value">3.2 TB</div>
+                            <div class="stat-label">Использовано</div>
+                        </div>
+                    </div>
+                    <!-- Email Campaign Section -->
+                    <div class="email-container" id="emailSection">
+                        <h2 class="email-title">
+                            <i class="fas fa-paper-plane"></i> Новая рассылка
+                        </h2>
+                        <form id="emailForm">
+                            <div class="form-group">
+                                <label for="emailSubject">Тема письма</label>
+                                <input
+                                    type="text"
+                                    id="emailSubject"
+                                    placeholder="Введите тему письма"
+                                    required
+                                />
+                            </div>
+                            <div class="form-group">
+                                <label for="emailContent"
+                                    >Содержание письма</label
+                                >
+                                <textarea
+                                    id="emailContent"
+                                    placeholder="Введите текст рассылки..."
+                                    required
+                                ></textarea>
+                            </div>
+                            <button type="submit" class="submit-btn">
+                                <i class="fas fa-paper-plane"></i> Отправить
+                                рассылку
+                            </button>
+                        </form>
+                    </div>
+                    <!-- Bulk Upload Section -->
+                    <div class="upload-container" id="uploadSection">
+                        <div id="variantBlocks">
+                            <!-- Блоки вариантов будут добавляться динамически -->
+                            <div class="variant-block">
+                                <button
+                                    class="remove-block"
+                                    style="display: none"
+                                >
+                                    ×
+                                </button>
+                                <div class="block-header">
+                                    <div class="block-number">1</div>
+                                    <h3 class="block-title">Вариант #1</h3>
+                                </div>
+                                <form class="variant-form">
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label>Название варианта *</label>
+                                            <input
+                                                type="text"
+                                                class="variant-name"
+                                                placeholder="Введите название"
+                                                required
+                                            />
+                                        </div>
+                                        <div class="form-group">
+                                            <label
+                                                >Описание (опционально)</label
+                                            >
+                                            <input
+                                                type="text"
+                                                class="variant-desc"
+                                                placeholder="Краткое описание"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label>Класс *</label>
+                                            <select
+                                                class="class-select"
+                                                required
+                                            >
+                                                <option value="">
+                                                    Выберите класс
+                                                </option>
+                                                <option value="5">
+                                                    5 класс
+                                                </option>
+                                                <option value="6">
+                                                    6 класс
+                                                </option>
+                                                <option value="7">
+                                                    7 класс
+                                                </option>
+                                                <option value="8">
+                                                    8 класс
+                                                </option>
+                                                <option value="9">
+                                                    9 класс
+                                                </option>
+                                                <option value="10">
+                                                    10 класс
+                                                </option>
+                                                <option value="11">
+                                                    11 класс
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Вид материала *</label>
+                                            <select
+                                                class="subject-select"
+                                                disabled
+                                                required
+                                            >
+                                                <option value="">
+                                                    Сначала выберите класс
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label>PDF файл *</label>
+                                            <div class="file-upload pdf-upload">
+                                                <i class="fas fa-file-pdf"></i>
+                                                <p>
+                                                    Перетащите PDF файл сюда или
+                                                    кликните для выбора
+                                                </p>
+                                                <div class="file-name">
+                                                    Файл не выбран
+                                                </div>
+                                                <input
+                                                    type="file"
+                                                    class="file-input pdf-input"
+                                                    accept=".pdf"
+                                                />
+                                                <div class="progress-bar">
+                                                    <div
+                                                        class="progress-fill"
+                                                    ></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label
+                                                >Видео (MP4, опционально)</label
+                                            >
+                                            <div
+                                                class="file-upload video-upload"
+                                            >
+                                                <i class="fas fa-video"></i>
+                                                <p>
+                                                    Перетащите видеофайл сюда
+                                                    или кликните для выбора
+                                                </p>
+                                                <div class="file-name">
+                                                    Файл не выбран
+                                                </div>
+                                                <input
+                                                    type="file"
+                                                    class="file-input video-input"
+                                                    accept=".mp4"
+                                                />
+                                                <div class="progress-bar">
+                                                    <div
+                                                        class="progress-fill"
+                                                    ></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="solved-checkbox">
+                                        <input
+                                            type="checkbox"
+                                            class="solved-checkbox-input"
+                                        />
+                                        <label>Решенный вариант</label>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <button class="add-block-btn" id="addBlockBtn">
+                            <i class="fas fa-plus-circle"></i> Добавить вариант
+                        </button>
+                        <button
+                            type="button"
+                            class="submit-btn"
+                            id="uploadAllBtn"
+                        >
+                            <i class="fas fa-cloud-upload-alt"></i> Загрузить
+                            все варианты
+                        </button>
+                        <div id="uploadStatus" style="margin-top: 20px"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Footer -->
+        <footer>
+            <div class="container">
+                <div class="footer-container">
+                    <div class="footer-section">
+                        <h3 class="footer-title">Formular</h3>
+                        <p>
+                            Формула успеха в математике для каждого ученика.
+                            Подготовка к ВПР, ОГЭ и ЕГЭ с 5 по 11 классы.
+                        </p>
+                    </div>
+                    <div class="footer-section">
+                        <h3 class="footer-title">Навигация</h3>
+                        <ul class="footer-links">
+                            <li><a href="#">Главная</a></li>
+                            <li><a href="#">О проекте</a></li>
+                            <li><a href="#">Классы</a></li>
+                            <li><a href="#">Тарифы</a></li>
+                            <li><a href="#">Контакты</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-section">
+                        <h3 class="footer-title">Контакты</h3>
+                        <ul class="footer-links">
+                            <li>
+                                <i class="fas fa-envelope"></i>
+                                support@formular.ru
+                            </li>
+                            <li>
+                                <i class="fas fa-phone"></i> +7 (495) 123-45-67
+                            </li>
+                            <li>
+                                <i class="fas fa-map-marker-alt"></i> Москва,
+                                ул. Математическая, д. 15
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="copyright">
+                    &copy; <span id="currentYear"></span> Formular. Все права
+                    защищены. Математика для каждого.
+                </div>
+            </div>
+        </footer>
+        <script src="/static/js/dashboard.js"></script>
+    </body>
+</html>

@@ -58,11 +58,29 @@ func HandleVerify(c *gin.Context) {
 			c.JSON(http.StatusAccepted, gin.H{"verify": "true"})
 			return
 		}
+	} else if errors.Is(cookieErr, http.ErrNoCookie) {
+		println("NO COOKIE")
+		refresh_cookie, refreshErr := c.Cookie("refresh_token")
+		if refreshErr != nil {
+			println(refreshErr.Error())
+			c.JSON(http.StatusUnauthorized, gin.H{"verify": "false"})
+			return
+		}
+		new_access_token, createErr := jwtconfigurator.GenerateAccessTokenFromRefresh(refresh_cookie)
+		if createErr != nil {
+			println("GENERATE ERROR: ", createErr.Error())
+			c.JSON(http.StatusUnauthorized, gin.H{"verify": "false"})
+			return
+		}
+		c.SetCookie("access_token", new_access_token, 8*60*60, "/", "127.0.0.1", false, true)
+		c.JSON(http.StatusAccepted, gin.H{"verify": "true"})
+		return
 	}
 }
 
 func HandleRegister(c *gin.Context) {
 	var newUser user.User
+
 	if err := c.BindJSON(&newUser); err != nil {
 		log.Printf("BindJSON error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Неверные данные"})
@@ -106,6 +124,7 @@ func HandleRegister(c *gin.Context) {
 	}
 
 	newUser.Role = "Anonymous"
+	newUser.IsAuthenticated = false
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -242,15 +261,14 @@ func HandleEmailVerify(c *gin.Context) {
 	}
 	println(redi_code)
 	if redi_code == VerifyInfo.Code {
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 		defer cancel()
 		finded_user, dbErr := godb.GetUserByEmail(ctx, user_email)
 		if dbErr != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка датабазы: " + dbErr.Error()})
 			return
 		}
-		finded_user.IsAuthenticated = true
-		finded_user.Role = "Member"
+		godb.SetUserAuthenticatedAndRole(ctx, finded_user.ID)
 		println(finded_user.ID)
 		tokenAccessString, err := jwtconfigurator.GenerateAccessToken(finded_user.ID, finded_user.Email)
 		if err != nil {

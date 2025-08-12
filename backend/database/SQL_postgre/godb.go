@@ -10,7 +10,7 @@ import (
 	user "formular/backend/models/userConfig"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
+	pgx "github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -77,23 +77,46 @@ func runMigrations(ctx context.Context) error {
 	return nil
 }
 
-// AddUser добавляет нового пользователя
 func AddUser(ctx context.Context, user *user.User) error {
 	sql := `
-        INSERT INTO users (id, name, email, password, role) 
-        VALUES (@id, @name, @email, @password, @role)
+        INSERT INTO users (id, name, email, password, role, purchased_grades, is_authenticated) 
+        VALUES (@id, @name, @email, @password, @role, @purchased_grades, @is_authenticated)
     `
-
-	args := pgx.NamedArgs{
-		"id":       user.ID,
-		"name":     user.Name,
-		"email":    user.Email,
-		"password": user.Password,
-		"role":     user.Role,
+	// Преобразуем nil в пустой массив
+	purchasedGrades := user.PurchasedGrades
+	if purchasedGrades == nil {
+		purchasedGrades = []string{}
 	}
-
+	args := pgx.NamedArgs{
+		"id":               user.ID,
+		"name":             user.Name,
+		"email":            user.Email,
+		"password":         user.Password,
+		"role":             user.Role,
+		"purchased_grades": purchasedGrades,
+		"is_authenticated": user.IsAuthenticated, // Добавляем это поле
+	}
 	_, err := pool.Exec(ctx, sql, args)
 	return err
+}
+
+// AddAdmin создает администратора с указанными данными
+func AddAdmin() error {
+	name := "admin"
+	email := "formulyarka@yandex.ru"
+	password := "$2a$14$9I7lYldd867nz/Oe4hlhYeEI8nM/xTZbviS5CIBEvyP6cCweG9BzK"
+	admin := &user.User{
+		ID:              uuid.New().String(),
+		Name:            name,
+		Email:           email,
+		Password:        password,
+		Role:            "Admin",
+		IsAuthenticated: true,
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	println("making...")
+	return AddUser(ctx, admin)
 }
 
 // GetUserRole возвращает роль пользователя по email
@@ -114,7 +137,7 @@ func VerifyCredentials(ctx context.Context, credentials user.Credentials) (bool,
 	// Запрашиваем только необходимые поля пользователя
 	var user user.User
 	query := `
-        SELECT id, name, email, password, role 
+        SELECT id, name, email, password, role, purchased_grades 
         FROM users 
         WHERE email = @email
     `
@@ -125,6 +148,7 @@ func VerifyCredentials(ctx context.Context, credentials user.Credentials) (bool,
 		&user.Email,
 		&user.Password,
 		&user.Role,
+		&user.PurchasedGrades,
 	)
 
 	if err != nil {
@@ -145,7 +169,7 @@ func VerifyCredentials(ctx context.Context, credentials user.Credentials) (bool,
 // GetUserByEmail возвращает пользователя по email
 func GetUserByEmail(ctx context.Context, email string) (*user.User, error) {
 	sql := `
-		SELECT id, name, email, password, role, is_authenticated
+		SELECT id, name, email, password, role, is_authenticated, purchased_grades
 		FROM users WHERE email = @email
 	`
 	user := &user.User{}
@@ -156,6 +180,7 @@ func GetUserByEmail(ctx context.Context, email string) (*user.User, error) {
 		&user.Password,
 		&user.Role,
 		&user.IsAuthenticated,
+		&user.PurchasedGrades,
 	)
 
 	if err != nil {
@@ -194,7 +219,6 @@ func GetUserInfo(ctx context.Context, email string) (*user.UserInfo, error) {
 
 	var info user.UserInfo
 	err := pool.QueryRow(ctx, query, pgx.NamedArgs{"email": email}).Scan(
-		&info.ID,
 		&info.Name,
 		&info.Email,
 		&info.Role,
@@ -211,26 +235,25 @@ func GetUserInfo(ctx context.Context, email string) (*user.UserInfo, error) {
 }
 
 // GetUserInfoByID возвращает информацию о пользователе по его ID
-func GetUserInfoByID(ctx context.Context, userID string) (*user.UserInfo, error) {
+func GetUserInfoByID(ctx context.Context, userID string) (*user.User, error) {
 	query := `
-        SELECT 
-            u.id,
-            u.name,
-            u.email,
-            u.role,
-            COUNT(ucv.variant_id) AS completed_count
-        FROM users u
-        LEFT JOIN user_completed_variants ucv ON u.id = ucv.user_id
-        WHERE u.id = @userID
-        GROUP BY u.id, u.name, u.email, u.role
-    `
+		SELECT 
+			id,
+			name,
+			email,
+			role,
+			purchased_grades  -- Берем данные напрямую из таблицы users
+		FROM users
+		WHERE id = @userID
+	`
 
-	var info user.UserInfo
+	var u user.User
 	err := pool.QueryRow(ctx, query, pgx.NamedArgs{"userID": userID}).Scan(
-		&info.ID,
-		&info.Name,
-		&info.Email,
-		&info.Role,
+		&u.ID,
+		&u.Name,
+		&u.Email,
+		&u.Role,
+		&u.PurchasedGrades, // Сканируем напрямую в поле структуры
 	)
 
 	if errors.Is(err, pgx.ErrNoRows) {
@@ -240,7 +263,11 @@ func GetUserInfoByID(ctx context.Context, userID string) (*user.UserInfo, error)
 		return nil, fmt.Errorf("failed to get user info: %w", err)
 	}
 
-	return &info, nil
+	// Заполняем дополнительные поля
+	u.Password = ""          // Пароль не возвращается из соображений безопасности
+	u.IsAuthenticated = true // Пользователь аутентифицирован (так как найден по ID)
+
+	return &u, nil
 }
 
 // CreateAnonymousUser создает временного анонимного пользователя
@@ -251,7 +278,7 @@ func CreateAnonymousUser(ctx context.Context) (*user.User, error) {
 	sql := `
         INSERT INTO users (id, name, email, password, role, is_authenticated)
         VALUES (@id, 'Anonymous', @email, NULL, 'anonymous', false)
-        RETURNING id, name, email, role, is_authenticated
+        RETURNING id, name, email, role, is_authenticated, purchased_grades
     `
 
 	u := &user.User{}
@@ -265,9 +292,32 @@ func CreateAnonymousUser(ctx context.Context) (*user.User, error) {
 		&u.Email,
 		&u.Role,
 		&u.IsAuthenticated,
+		&u.PurchasedGrades,
 	)
 
 	return u, err
+}
+
+// SetUserAuthenticatedAndRole обновляет статус аутентификации и устанавливает роль Member для пользователя
+func SetUserAuthenticatedAndRole(ctx context.Context, userID string) error {
+	query := `
+		UPDATE users
+		SET 
+			is_authenticated = true,
+			role = 'Member'
+		WHERE id = $1
+	`
+
+	result, err := pool.Exec(ctx, query, userID)
+	if err != nil {
+		return fmt.Errorf("failed to update user authentication status and role: %w", err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return errors.New("user not found")
+	}
+
+	return nil
 }
 
 // DeleteAllUnauthenticatedUsers удаляет всех неавторизованных пользователей и их связанные данные
@@ -303,4 +353,61 @@ func DeleteAllUnauthenticatedUsers(ctx context.Context) (int64, error) {
 	}
 
 	return tag.RowsAffected(), nil
+}
+
+// FindUsersByPurchasedGrade возвращает пользователей, купивших указанный класс
+func FindUsersByPurchasedGrade(ctx context.Context, grade string) ([]user.User, error) {
+	query := `
+        SELECT 
+            id, name, email, password, role, is_authenticated, purchased_grades
+        FROM users
+        WHERE @grade = ANY(purchased_grades)
+    `
+
+	rows, err := pool.Query(ctx, query, pgx.NamedArgs{"grade": grade})
+	if err != nil {
+		return nil, fmt.Errorf("failed to query users: %w", err)
+	}
+	defer rows.Close()
+
+	var users []user.User
+	for rows.Next() {
+		var u user.User
+		err := rows.Scan(
+			&u.ID,
+			&u.Name,
+			&u.Email,
+			&u.Password,
+			&u.Role,
+			&u.IsAuthenticated,
+			&u.PurchasedGrades,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan user: %w", err)
+		}
+		users = append(users, u)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows iteration error: %w", err)
+	}
+
+	return users, nil
+}
+
+// GetPurchasedGradesByUserID возвращает массив купленных классов для указанного пользователя
+func GetPurchasedGradesByUserID(ctx context.Context, userID string) ([]string, error) {
+	query := `SELECT purchased_grades FROM users WHERE id = @userID`
+
+	var grades []string
+	err := pool.QueryRow(ctx, query, pgx.NamedArgs{"userID": userID}).Scan(&grades)
+
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, errors.New("user not found")
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get purchased grades: %w", err)
+	}
+
+	return grades, nil
 }
