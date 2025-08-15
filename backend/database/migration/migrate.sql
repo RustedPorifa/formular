@@ -2,9 +2,9 @@
 DO $$
 BEGIN
     IF EXISTS (
-        SELECT 1 FROM information_schema.columns 
-        WHERE table_name = 'users' 
-          AND column_name = 'password' 
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'users'
+          AND column_name = 'password'
           AND is_nullable = 'NO'
     ) THEN
         ALTER TABLE users ALTER COLUMN password DROP NOT NULL;
@@ -28,8 +28,8 @@ CREATE TABLE IF NOT EXISTS users (
 DO $$
 BEGIN
     IF EXISTS (
-        SELECT 1 FROM information_schema.columns 
-        WHERE table_name = 'users' 
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'users'
           AND column_name = 'purchased_grades'
           AND (column_default IS NULL OR column_default <> '''{}''::text[]')
     ) THEN
@@ -40,7 +40,7 @@ EXCEPTION WHEN undefined_table THEN
 END $$;
 
 -- Добавляем новые колонки в существующую таблицу (если отсутствуют)
-ALTER TABLE users 
+ALTER TABLE users
     ADD COLUMN IF NOT EXISTS is_authenticated BOOLEAN NOT NULL DEFAULT FALSE,
     ADD COLUMN IF NOT EXISTS purchased_grades TEXT[] NOT NULL DEFAULT '{}';
 

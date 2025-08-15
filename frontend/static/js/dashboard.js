@@ -135,8 +135,8 @@ function initVariantBlock(block) {
         videoUpload.style.borderColor = "";
         return;
       }
-      // Проверка размера файла (максимум 100MB)
-      if (file.size > 100 * 1024 * 1024) {
+      // Проверка размера файла (максимум 10гб)
+      if (file.size > 10000 * 1024 * 1024) {
         alert("Файл слишком большой. Максимальный размер - 100MB");
         this.value = "";
         videoFileName.textContent = "Файл не выбран";

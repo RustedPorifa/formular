@@ -79,7 +79,7 @@ func runMigrations(ctx context.Context) error {
 
 func AddUser(ctx context.Context, user *user.User) error {
 	sql := `
-        INSERT INTO users (id, name, email, password, role, purchased_grades, is_authenticated) 
+        INSERT INTO users (id, name, email, password, role, purchased_grades, is_authenticated)
         VALUES (@id, @name, @email, @password, @role, @purchased_grades, @is_authenticated)
     `
 	// Преобразуем nil в пустой массив
@@ -137,8 +137,8 @@ func VerifyCredentials(ctx context.Context, credentials user.Credentials) (bool,
 	// Запрашиваем только необходимые поля пользователя
 	var user user.User
 	query := `
-        SELECT id, name, email, password, role, purchased_grades 
-        FROM users 
+        SELECT id, name, email, password, role, purchased_grades
+        FROM users
         WHERE email = @email
     `
 
@@ -206,7 +206,7 @@ func UserExists(ctx context.Context, userID string) (bool, error) {
 // GetUserInfo возвращает информацию о пользователе по email
 func GetUserInfo(ctx context.Context, email string) (*user.UserInfo, error) {
 	query := `
-        SELECT 
+        SELECT
             u.name,
             u.email,
             u.role,
@@ -237,7 +237,7 @@ func GetUserInfo(ctx context.Context, email string) (*user.UserInfo, error) {
 // GetUserInfoByID возвращает информацию о пользователе по его ID
 func GetUserInfoByID(ctx context.Context, userID string) (*user.User, error) {
 	query := `
-		SELECT 
+		SELECT
 			id,
 			name,
 			email,
@@ -302,7 +302,7 @@ func CreateAnonymousUser(ctx context.Context) (*user.User, error) {
 func SetUserAuthenticatedAndRole(ctx context.Context, userID string) error {
 	query := `
 		UPDATE users
-		SET 
+		SET
 			is_authenticated = true,
 			role = 'Member'
 		WHERE id = $1
@@ -358,7 +358,7 @@ func DeleteAllUnauthenticatedUsers(ctx context.Context) (int64, error) {
 // FindUsersByPurchasedGrade возвращает пользователей, купивших указанный класс
 func FindUsersByPurchasedGrade(ctx context.Context, grade string) ([]user.User, error) {
 	query := `
-        SELECT 
+        SELECT
             id, name, email, password, role, is_authenticated, purchased_grades
         FROM users
         WHERE @grade = ANY(purchased_grades)
