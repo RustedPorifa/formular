@@ -8,6 +8,7 @@ import (
 	"time"
 
 	user "formular/backend/models/userConfig"
+	variantconfig "formular/backend/models/variantConfig"
 
 	"github.com/google/uuid"
 	pgx "github.com/jackc/pgx/v5"
@@ -410,4 +411,148 @@ func GetPurchasedGradesByUserID(ctx context.Context, userID string) ([]string, e
 	}
 
 	return grades, nil
+}
+
+// AddVariant добавляет информацию о варианте в базу данных
+func AddVariant(ctx context.Context, variantInfo *variantconfig.VariantInfo) error {
+	sql := `
+		INSERT INTO variants (uuid, name, description, class, subject, solved, pdf_file_path, video_file_path)
+		VALUES (@uuid, @name, @description, @class, @subject, @solved, @pdf_file_path, @video_file_path)
+	`
+
+	args := pgx.NamedArgs{
+		"uuid":            variantInfo.UUID,
+		"name":            variantInfo.Name,
+		"description":     variantInfo.Description,
+		"class":           variantInfo.Class,
+		"subject":         variantInfo.Subject,
+		"solved":          variantInfo.Solved,
+		"pdf_file_path":   variantInfo.PDFFilePath,
+		"video_file_path": toNullString(variantInfo.VideoFilePath),
+	}
+
+	_, err := pool.Exec(ctx, sql, args)
+	if err != nil {
+		return fmt.Errorf("failed to add variant: %w", err)
+	}
+
+	return nil
+}
+
+// GetVariantByUUID возвращает информацию о варианте по его UUID
+func GetVariantByUUID(ctx context.Context, variantUUID string) (*variantconfig.VariantInfo, error) {
+	sql := `
+		SELECT uuid, name, description, class, subject, solved, pdf_file_path, video_file_path
+		FROM variants
+		WHERE uuid = @uuid
+	`
+
+	var variantInfo variantconfig.VariantInfo
+	err := pool.QueryRow(ctx, sql, pgx.NamedArgs{"uuid": variantUUID}).Scan(
+		&variantInfo.UUID,
+		&variantInfo.Name,
+		&variantInfo.Description,
+		&variantInfo.Class,
+		&variantInfo.Subject,
+		&variantInfo.Solved,
+		&variantInfo.PDFFilePath,
+		&variantInfo.VideoFilePath,
+	)
+
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, errors.New("variant not found")
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get variant: %w", err)
+	}
+
+	return &variantInfo, nil
+}
+
+// GetAllVariants возвращает массив всех вариантов из базы данных
+func GetAllVariants(ctx context.Context) ([]variantconfig.VariantInfo, error) {
+	sql := `
+		SELECT uuid, name, description, class, subject, solved, pdf_file_path, video_file_path
+		FROM variants
+		ORDER BY class, subject, name
+	`
+
+	rows, err := pool.Query(ctx, sql)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query variants: %w", err)
+	}
+	defer rows.Close()
+
+	var variants []variantconfig.VariantInfo
+	for rows.Next() {
+		var v variantconfig.VariantInfo
+		err := rows.Scan(
+			&v.UUID,
+			&v.Name,
+			&v.Description,
+			&v.Class,
+			&v.Subject,
+			&v.Solved,
+			&v.PDFFilePath,
+			&v.VideoFilePath,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan variant: %w", err)
+		}
+		variants = append(variants, v)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows iteration error: %w", err)
+	}
+
+	return variants, nil
+}
+
+// GetVariantsByClass возвращает массив вариантов по указанному классу
+func GetVariantsByClass(ctx context.Context, class string) ([]variantconfig.VariantInfo, error) {
+	sql := `
+		SELECT uuid, name, description, class, subject, solved, pdf_file_path, video_file_path
+		FROM variants
+		WHERE class = @class
+		ORDER BY subject, name
+	`
+
+	rows, err := pool.Query(ctx, sql, pgx.NamedArgs{"class": class})
+	if err != nil {
+		return nil, fmt.Errorf("failed to query variants by class: %w", err)
+	}
+	defer rows.Close()
+
+	var variants []variantconfig.VariantInfo
+	for rows.Next() {
+		var v variantconfig.VariantInfo
+		err := rows.Scan(
+			&v.UUID,
+			&v.Name,
+			&v.Description,
+			&v.Class,
+			&v.Subject,
+			&v.Solved,
+			&v.PDFFilePath,
+			&v.VideoFilePath,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan variant: %w", err)
+		}
+		variants = append(variants, v)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows iteration error: %w", err)
+	}
+
+	return variants, nil
+}
+
+func toNullString(s string) interface{} {
+	if s == "" {
+		return nil
+	}
+	return s
 }

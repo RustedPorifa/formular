@@ -6,8 +6,8 @@ import (
 	godb "formular/backend/database/SQL_postgre"
 	"formular/backend/handlers/auth"
 	"formular/backend/handlers/cloudflare"
-	"formular/backend/handlers/kims"
 	"formular/backend/handlers/payments"
+	"formular/backend/handlers/reader"
 	"formular/backend/handlers/upload"
 	"formular/backend/middleware"
 	"formular/backend/utils/email"
@@ -75,9 +75,6 @@ func main() {
 	router.GET("/", homeHandler)
 	router.GET("loginform", middleware.CSRFMiddleware(), loginHandler)
 	router.GET("/submit", cloudflare.CloudflareHandler)
-	//KIMS group
-	variantsGroup := router.Group("/kims")
-	variantsGroup.GET("/:grade/:type", kims.HandleGrade)
 	//CSRF GROUP
 	csrfGroup := router.Group("/api")
 	csrfGroup.Use(middleware.CSRFMiddleware())
@@ -93,6 +90,10 @@ func main() {
 	paymentGroup.POST("result")
 	paymentGroup.POST("success")
 	paymentGroup.POST("fail")
+	//variants
+	variantsGroup := router.Group("/variants")
+	variantsGroup.GET("/get/:grade", reader.HandleGetVariant)
+	variantsGroup.GET("/show/:grade", showHandler)
 	//AUTHORIZED ONLY
 	authorizedGroup := router.Group("/user")
 	authorizedGroup.Use(middleware.AuthMiddleware())
@@ -115,6 +116,10 @@ func loginHandler(c *gin.Context) {
 
 func verifyHandler(c *gin.Context) {
 	c.HTML(http.StatusOK, "email.html", gin.H{})
+}
+
+func showHandler(c *gin.Context) {
+	c.HTML(http.StatusOK, "variants.html", gin.H{})
 }
 
 func testHandler(c *gin.Context) {

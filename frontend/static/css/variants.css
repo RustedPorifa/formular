@@ -1,0 +1,235 @@
+/* Variants Container */
+.variants-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2rem;
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Variant Card */
+.variant-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.variant-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #4a6fa5, #166088, #ff6b6b);
+    border-radius: 4px 4px 0 0;
+}
+
+.variant-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+}
+
+/* Dark theme support */
+.dark-theme .variant-card {
+    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Variant Header */
+.variant-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.variant-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--dark);
+    margin: 0;
+    line-height: 1.3;
+}
+
+.dark-theme .variant-title {
+    color: #f0f0f0;
+}
+
+.variant-badge {
+    background: linear-gradient(135deg, #4a6fa5, #166088);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* Variant Meta */
+.variant-meta {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--gray);
+}
+
+.dark-theme .meta-item {
+    color: #a0aec0;
+}
+
+.meta-icon {
+    width: 16px;
+    height: 16px;
+    opacity: 0.7;
+}
+
+/* Variant Description */
+.variant-description {
+    color: var(--gray);
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.dark-theme .variant-description {
+    color: #a0aec0;
+}
+
+/* Variant Actions */
+.variant-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    flex: 1;
+    min-width: 120px;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.action-btn-primary {
+    background: linear-gradient(135deg, #4a6fa5, #166088);
+    color: white;
+}
+
+.action-btn-primary:hover {
+    background: linear-gradient(135deg, #166088, #4a6fa5);
+    transform: translateY(-2px);
+}
+
+.action-btn-secondary {
+    background: rgba(74, 111, 165, 0.1);
+    color: #4a6fa5;
+    border: 1px solid rgba(74, 111, 165, 0.2);
+}
+
+.action-btn-secondary:hover {
+    background: rgba(74, 111, 165, 0.2);
+    transform: translateY(-2px);
+}
+
+.dark-theme .action-btn-secondary {
+    background: rgba(74, 111, 165, 0.2);
+    color: #a0aec0;
+    border: 1px solid rgba(74, 111, 165, 0.3);
+}
+
+/* Loading States */
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #4a6fa5;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Error State */
+.error-message {
+    text-align: center;
+    padding: 3rem;
+    color: var(--gray);
+}
+
+.dark-theme .error-message {
+    color: #a0aec0;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: var(--gray);
+}
+
+.dark-theme .empty-state {
+    color: #a0aec0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .variants-container {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+        gap: 1rem;
+    }
+
+    .variant-card {
+        padding: 1rem;
+    }
+
+    .variant-actions {
+        flex-direction: column;
+    }
+
+    .action-btn {
+        min-width: auto;
+    }
+}

@@ -44,20 +44,20 @@ ALTER TABLE users
     ADD COLUMN IF NOT EXISTS is_authenticated BOOLEAN NOT NULL DEFAULT FALSE,
     ADD COLUMN IF NOT EXISTS purchased_grades TEXT[] NOT NULL DEFAULT '{}';
 
--- Остальные таблицы без изменений
-CREATE TABLE IF NOT EXISTS variants (
-    id SERIAL PRIMARY KEY,
-    title VARCHAR(255) NOT NULL UNIQUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
 
-CREATE TABLE IF NOT EXISTS user_completed_variants (
-    user_id VARCHAR(36) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    variant_id INT NOT NULL REFERENCES variants(id) ON DELETE CASCADE,
-    completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (user_id, variant_id)
-);
+
 
 -- Индексы
 CREATE INDEX IF NOT EXISTS idx_users_mail ON users(email);
-CREATE INDEX IF NOT EXISTS idx_completed_variants_user ON user_completed_variants(user_id);
+
+-- Создаем новую таблицу variants с полной информацией
+CREATE TABLE IF NOT EXISTS variants (
+    uuid VARCHAR(36) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    class VARCHAR(10) NOT NULL,
+    subject VARCHAR(50) NOT NULL,
+    solved BOOLEAN DEFAULT FALSE,
+    pdf_file_path VARCHAR(500) NOT NULL,
+    video_file_path VARCHAR(500)
+);

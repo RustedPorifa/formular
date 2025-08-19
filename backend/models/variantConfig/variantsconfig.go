@@ -1,11 +1,12 @@
 package variantconfig
 
 type VariantInfo struct {
-	Name          string
-	Description   string
-	Class         string
-	Subject       string
-	Solved        bool
-	PDFFilePath   string
-	VideoFilePath string
+	UUID          string `json:"uuid"`
+	Name          string `json:"name"`
+	Description   string `json:"description"`
+	Class         string `json:"class"`
+	Subject       string `json:"subject"`
+	Solved        bool   `json:"solved"`
+	PDFFilePath   string `json:"pdfFilePath"`
+	VideoFilePath string `json:"videoFilePath"`
 }

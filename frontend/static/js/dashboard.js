@@ -146,13 +146,13 @@ function initVariantBlock(block) {
       videoFileName.textContent = file.name;
       videoUpload.style.borderColor = "var(--success)";
     }
-  });
 
-  // Удаление блока
-  const removeBtn = block.querySelector(".remove-block");
-  removeBtn.addEventListener("click", function () {
-    block.remove();
-    updateBlockNumbers();
+    // Удаление блока
+    const removeBtn = block.querySelector(".remove-block");
+    removeBtn.addEventListener("click", function () {
+      block.remove();
+      updateBlockNumbers();
+    });
   });
 }
 

@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Formular - Подготовка к математике</title>
+        <link rel="stylesheet" href="/static/css/variants.css" />
+    </head>
+    <body>
+        <!-- Overlay -->
+        <div class="overlay" id="overlay"></div>
+
+        <!-- Settings Menu -->
+        <div class="settings-menu" id="settingsMenu">
+            <div class="settings-header">
+                <h2>Настройки и социальные сети</h2>
+                <button class="close-menu" id="closeMenu">×</button>
+            </div>
+
+            <div class="menu-section">
+                <h3>Тема оформления</h3>
+                <div class="theme-switch">
+                    <span>Темная тема</span>
+                    <label class="switch">
+                        <input type="checkbox" id="themeToggle" />
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="menu-section">
+                <h3>Социальные сети</h3>
+                <div class="menu-grid">
+                    <a href="#" class="menu-btn">
+                        <div>VK</div>
+                        <span>ВКонтакте</span>
+                    </a>
+                    <a href="#" class="menu-btn">
+                        <div>TG</div>
+                        <span>Telegram</span>
+                    </a>
+                    <a href="#" class="menu-btn">
+                        <div>YT</div>
+                        <span>YouTube</span>
+                    </a>
+                    <a href="#" class="menu-btn">
+                        <div>OK</div>
+                        <span>Одноклассники</span>
+                    </a>
+                    <a href="#" class="menu-btn">
+                        <div>DZ</div>
+                        <span>Дзен</span>
+                    </a>
+                    <a href="#" class="menu-btn">
+                        <div>RU</div>
+                        <span>Рутуб</span>
+                    </a>
+                    <a href="#" class="menu-btn">
+                        <div>TT</div>
+                        <span>TikTok</span>
+                    </a>
+                    <a href="#" class="menu-btn">
+                        <div>IN</div>
+                        <span>Instagram</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="menu-section">
+                <h3>Дополнительные настройки</h3>
+                <div class="menu-grid">
+                    <button class="menu-btn">
+                        <div>🔔</div>
+                        <span>Уведомления</span>
+                    </button>
+                    <button class="menu-btn">
+                        <div>🔒</div>
+                        <span>Безопасность</span>
+                    </button>
+                    <button class="menu-btn">
+                        <div>🌐</div>
+                        <span>Язык</span>
+                    </button>
+                    <button class="menu-btn">
+                        <div>🖨️</div>
+                        <span>Печать</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <header>
+            <div class="container header-container">
+                <div class="logo-container">
+                    <div class="logo-icon">🧪</div>
+                    <div class="logo-text">Formular</div>
+                </div>
+
+                <nav>
+                    <ul class="nav-list">
+                        <li>
+                            <a href="#">5 класс</a>
+                            <ul class="submenu">
+                                <li><a href="#">Математика</a></li>
+                                <li><a href="#">ВПР</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#">6 класс</a>
+                            <ul class="submenu">
+                                <li><a href="#">Математика</a></li>
+                                <li><a href="#">ВПР</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#">7 класс</a>
+                            <ul class="submenu">
+                                <li><a href="#">Алгебра</a></li>
+                                <li><a href="#">Геометрия</a></li>
+                                <li><a href="#">ВПР</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#">8 класс</a>
+                            <ul class="submenu">
+                                <li><a href="#">Алгебра</a></li>
+                                <li><a href="#">Геометрия</a></li>
+                                <li><a href="#">ВПР</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#">9 класс</a>
+                            <ul class="submenu">
+                                <li><a href="#">Алгебра</a></li>
+                                <li><a href="#">Геометрия</a></li>
+                                <li><a href="#">ОГЭ</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#">10-11 классы</a>
+                            <ul class="submenu">
+                                <li><a href="#">Алгебра</a></li>
+                                <li><a href="#">Геометрия</a></li>
+                                <li><a href="#">Стереометрия</a></li>
+                                <li><a href="#">ЕГЭ</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </nav>
+
+                <div class="header-controls">
+                    <button>
+                        class="auth-btn" id="auth-profile-btn"
+                        onclick="window.location='/loginform'"
+                        Войти/Зарегистрироваться
+                    </button>
+                    <button class="settings-btn" id="settingsBtn">⚙️</button>
+                </div>
+            </div>
+        </header>
+        <div id="variants-holder"></div>
+        <script src="/static/js/variants.js"></script>
+    </body>
+</html>

@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"slices"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -137,6 +138,28 @@ func AdminMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+	}
+}
+
+func variantsHandler() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		grade := c.Param("grade")
+		isSolved := c.Param("isSolved")
+		if isSolved == "solved" {
+			user_info, checkErr := tokenchecker.ValidateAccessTokenWithRefresh(c)
+			if checkErr != nil {
+				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+				return
+			}
+			if slices.Contains(user_info.PurchasedGrades, grade) {
+				c.Next()
+			} else {
+				c.HTML(http.StatusForbidden, "403_pay.html", gin.H{})
+				c.Abort()
+				return
+			}
+		}
+
 	}
 }
 

@@ -1,8 +1,9 @@
 package upload
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
+	godb "formular/backend/database/SQL_postgre"
 	variantconfig "formular/backend/models/variantConfig"
 	"log"
 	"mime/multipart"
@@ -10,6 +11,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -86,22 +88,29 @@ func UploadHandler(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка загрузки файла: " + uploadErr.Error()})
 			return
 		}
-		c.SaveUploadedFile(variant.VideoFile, path_to_variant+"/"+variant.VideoFile.Filename)
-		variant_json := variantconfig.VariantInfo{
+		var videoFilePath string
+		videoErr := c.SaveUploadedFile(variant.VideoFile, path_to_variant+"/"+variant.VideoFile.Filename)
+		if videoErr != nil && variant.VideoFile.Filename == "" {
+			videoFilePath = ""
+		} else {
+			videoFilePath = path_to_variant + "/" + variant.VideoFile.Filename
+		}
+		variant_config := variantconfig.VariantInfo{
+			UUID:          uuid,
 			Name:          variant.Name,
+			Description:   variant.Description,
 			Class:         variant.Class,
+			Subject:       variant.Subject,
+			Solved:        variant.Solved,
 			PDFFilePath:   path_to_variant + "/" + variant.PDFFile.Filename,
-			VideoFilePath: path_to_variant + "/" + variant.VideoFile.Filename,
+			VideoFilePath: videoFilePath,
 		}
-		json_data, jsonErr := json.Marshal(variant_json)
-		if jsonErr != nil {
-			log.Println(jsonErr)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка сериализации JSON: " + jsonErr.Error()})
-			return
-		}
-		errWrte := os.WriteFile(path_to_variant+"/variant.json", json_data, 0777)
-		if errWrte != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка записи файла: " + errWrte.Error()})
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		dbErr := godb.AddVariant(ctx, &variant_config)
+		if dbErr != nil {
+			log.Println(dbErr)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка добавления варианта: " + dbErr.Error()})
 			return
 		}
 	}
