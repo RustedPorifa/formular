@@ -248,6 +248,7 @@ func HandleEmailVerify(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Неверные данные"})
 		return
 	}
+
 	user_email, parseErr := jwtconfigurator.VerifyEmailToken(VerifyInfo.Email)
 	if parseErr != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка верификации токена: " + parseErr.Error()})

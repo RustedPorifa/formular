@@ -332,13 +332,12 @@
                     <div class="resend-link disabled" id="resendLink">
                         Отправить код повторно
                     </div>
-                    <a href="auth.html" class="back-link"
+                    <a href="/loginform" class="back-link"
                         >Вернуться на страницу входа</a
                     >
                 </form>
             </div>
         </div>
-
         <script>
             // Элементы DOM
             const codeInputs = document.querySelectorAll(".code-input");
@@ -348,23 +347,36 @@
             const statusMessage = document.getElementById("statusMessage");
             const verificationForm =
                 document.getElementById("verificationForm");
-            const emailDisplay = document.querySelector(
-                ".verification-header .email",
-            );
-            const verificationEmail =
-                document.getElementById("verification-email");
+
+            // Функция для извлечения JWT токена из URL
+            function getJwtTokenFromUrl() {
+                try {
+                    const urlParams = new URLSearchParams(
+                        window.location.search,
+                    );
+                    const jwtToken = urlParams.get("email");
+
+                    if (!jwtToken) {
+                        console.error("JWT token not found in URL");
+                        return null;
+                    }
+
+                    return jwtToken;
+                } catch (error) {
+                    console.error(
+                        "Error extracting JWT token from URL:",
+                        error,
+                    );
+                    return null;
+                }
+            }
 
             // Инициализация страницы
             document.addEventListener("DOMContentLoaded", () => {
-                // Получаем email из URL
-                const email = getEmailFromUrl();
+                // Получаем JWT токен из URL
+                const jwtToken = getJwtTokenFromUrl();
 
-                if (email) {
-                    // Отображаем email в интерфейсе
-                    emailDisplay.textContent = email;
-                    // Сохраняем email в скрытое поле формы
-                    verificationEmail.value = email;
-
+                if (jwtToken) {
                     // Установка фокуса на первое поле
                     codeInputs[0].focus();
                     // Запуск таймера
@@ -375,11 +387,8 @@
                         resendLink.classList.remove("disabled");
                     }, 30000);
                 } else {
-                    // Если email не передан в URL, показываем ошибку
-                    emailDisplay.textContent = "Ошибка: email не указан";
-                    emailDisplay.style.background = "rgba(220, 53, 69, 0.2)";
                     statusMessage.textContent =
-                        "Ошибка: email не указан. Вернитесь к регистрации.";
+                        "Ошибка: токен не указан. Вернитесь к регистрации.";
                     statusMessage.className = "status-message error";
                     statusMessage.style.display = "block";
 
@@ -464,33 +473,29 @@
             verificationForm.addEventListener("submit", async function (e) {
                 e.preventDefault();
 
-                // Проверяем, есть ли email
-                const email = verificationEmail.value;
-                if (!email) {
+                // Получаем JWT токен из URL
+                const jwtToken = getJwtTokenFromUrl();
+                if (!jwtToken) {
                     statusMessage.textContent =
-                        "Ошибка: email не указан. Вернитесь к регистрации.";
+                        "Ошибка: токен не указан. Вернитесь к регистрации.";
                     statusMessage.className = "status-message error";
                     statusMessage.style.display = "block";
                     return;
                 }
 
                 // Сбор кода из полей ввода
+                let code = "";
+                codeInputs.forEach((input) => {
+                    code += input.value;
+                });
 
-                // Отправка кода и email на сервер
+                // Отправка кода и JWT токена на сервер
                 try {
                     statusMessage.textContent = "Проверка кода...";
                     statusMessage.className = "status-message";
                     statusMessage.style.display = "block";
                     verifyBtn.disabled = true;
-                    const urlParams = new URLSearchParams(
-                        window.location.search,
-                    );
-                    const email = urlParams.get("email");
 
-                    let code = "";
-                    codeInputs.forEach((input) => {
-                        code += input.value;
-                    });
                     const response = await fetch("/api/verify/email", {
                         method: "POST",
                         headers: {
@@ -498,7 +503,7 @@
                             "Content-Type": "application/json",
                         },
                         body: JSON.stringify({
-                            email: email,
+                            email: jwtToken, // Просто передаем JWT токен как есть
                             code: code,
                         }),
                     });
@@ -559,10 +564,11 @@
             resendLink.addEventListener("click", async function () {
                 if (this.classList.contains("disabled")) return;
 
-                const email = verificationEmail.value;
-                if (!email) {
+                // Получаем JWT токен из URL
+                const jwtToken = getJwtTokenFromUrl();
+                if (!jwtToken) {
                     statusMessage.textContent =
-                        "Ошибка: email не указан. Вернитесь к регистрации.";
+                        "Ошибка: токен не указан. Вернитесь к регистрации.";
                     statusMessage.className = "status-message error";
                     statusMessage.style.display = "block";
                     return;
@@ -580,7 +586,7 @@
                         headers: {
                             "Content-Type": "application/json",
                         },
-                        body: JSON.stringify({ email: email }),
+                        body: JSON.stringify({ email: jwtToken }), // Просто передаем JWT токен как есть
                     });
 
                     if (response.ok) {
@@ -623,6 +629,7 @@
                     verifyBtn.disabled = false;
                 }
             });
+
             function getCookie(name) {
                 const value = `; ${document.cookie}`;
                 const parts = value.split(`; ${name}=`);
