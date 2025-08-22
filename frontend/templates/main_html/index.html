@@ -1,227 +1,275 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formular - Подготовка к математике</title>
-    <link rel="stylesheet" href="/static/css/main.css">
-</head>
-<body>
-    <!-- Overlay -->
-    <div class="overlay" id="overlay"></div>
-    
-    <!-- Settings Menu -->
-    <div class="settings-menu" id="settingsMenu">
-        <div class="settings-header">
-            <h2>Настройки и социальные сети</h2>
-            <button class="close-menu" id="closeMenu">×</button>
-        </div>
-        
-        <div class="menu-section">
-            <h3>Тема оформления</h3>
-            <div class="theme-switch">
-                <span>Темная тема</span>
-                <label class="switch">
-                    <input type="checkbox" id="themeToggle">
-                    <span class="slider"></span>
-                </label>
-            </div>
-        </div>
-        
-        <div class="menu-section">
-            <h3>Социальные сети</h3>
-            <div class="menu-grid">
-                <a href="#" class="menu-btn">
-                    <div>VK</div>
-                    <span>ВКонтакте</span>
-                </a>
-                <a href="#" class="menu-btn">
-                    <div>TG</div>
-                    <span>Telegram</span>
-                </a>
-                <a href="#" class="menu-btn">
-                    <div>YT</div>
-                    <span>YouTube</span>
-                </a>
-                <a href="#" class="menu-btn">
-                    <div>OK</div>
-                    <span>Одноклассники</span>
-                </a>
-                <a href="#" class="menu-btn">
-                    <div>DZ</div>
-                    <span>Дзен</span>
-                </a>
-                <a href="#" class="menu-btn">
-                    <div>RU</div>
-                    <span>Рутуб</span>
-                </a>
-                <a href="#" class="menu-btn">
-                    <div>TT</div>
-                    <span>TikTok</span>
-                </a>
-                <a href="#" class="menu-btn">
-                    <div>IN</div>
-                    <span>Instagram</span>
-                </a>
-            </div>
-        </div>
-        
-        <div class="menu-section">
-            <h3>Дополнительные настройки</h3>
-            <div class="menu-grid">
-                <button class="menu-btn">
-                    <div>🔔</div>
-                    <span>Уведомления</span>
-                </button>
-                <button class="menu-btn">
-                    <div>🔒</div>
-                    <span>Безопасность</span>
-                </button>
-                <button class="menu-btn">
-                    <div>🌐</div>
-                    <span>Язык</span>
-                </button>
-                <button class="menu-btn">
-                    <div>🖨️</div>
-                    <span>Печать</span>
-                </button>
-            </div>
-        </div>
-    </div>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Формулярка - Подготовка к математике</title>
+        <link rel="stylesheet" href="/static/css/main.css" />
+    </head>
+    <body>
+        <!-- Overlay -->
+        <div class="overlay" id="overlay"></div>
 
-    <!-- Header -->
-    <header>
-        <div class="container header-container">
-            <div class="logo-container">
-                <div class="logo-icon">🧪</div>
-                <div class="logo-text">Formular</div>
+        <!-- Settings Menu -->
+        <div class="settings-menu" id="settingsMenu">
+            <div class="settings-header">
+                <h2>Настройки и социальные сети</h2>
+                <button class="close-menu" id="closeMenu">×</button>
             </div>
-            
-            <nav>
-                <ul class="nav-list">
-                    <li>
-                        <a href="#">5 класс</a>
-                        <ul class="submenu">
-                            <li><a href="#">Математика</a></li>
-                            <li><a href="#">ВПР</a></li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a href="#">6 класс</a>
-                        <ul class="submenu">
-                            <li><a href="#">Математика</a></li>
-                            <li><a href="#">ВПР</a></li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a href="#">7 класс</a>
-                        <ul class="submenu">
-                            <li><a href="#">Алгебра</a></li>
-                            <li><a href="#">Геометрия</a></li>
-                            <li><a href="#">ВПР</a></li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a href="#">8 класс</a>
-                        <ul class="submenu">
-                            <li><a href="#">Алгебра</a></li>
-                            <li><a href="#">Геометрия</a></li>
-                            <li><a href="#">ВПР</a></li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a href="#">9 класс</a>
-                        <ul class="submenu">
-                            <li><a href="#">Алгебра</a></li>
-                            <li><a href="#">Геометрия</a></li>
-                            <li><a href="#">ОГЭ</a></li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a href="#">10-11 классы</a>
-                        <ul class="submenu">
-                            <li><a href="#">Алгебра</a></li>
-                            <li><a href="#">Геометрия</a></li>
-                            <li><a href="#">Стереометрия</a></li>
-                            <li><a href="#">ЕГЭ</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </nav>
-            
-            <div class="header-controls">
-                <button class="auth-btn" id="auth-profile-btn" onclick="window.location='/loginform'">Войти/Зарегистрироваться</button>
-                <button class="settings-btn" id="settingsBtn">⚙️</button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="container">
-            <h1>Formular - Математика для каждого</h1>
-            <p>Эффективная подготовка к урокам, ВПР, ОГЭ и ЕГЭ по математике для учеников 5-11 классов. Простое объяснение сложных тем и индивидуальный подход.</p>
-            <a href="#" class="cta-button">Начать обучение</a>
-        </div>
-    </section>
-
-    <!-- Content Section -->
-    <section class="content-section">
-        <div class="container">
-            <h2 class="section-title">О нашем проекте</h2>
-            <div class="blocks-container">
-                <div class="block">
-                    <div class="block-header">
-                        <h3>Наша миссия</h3>
-                    </div>
-                    <div class="block-content">
-                        <p>Мы стремимся сделать математику доступной и понятной для каждого школьника. Наша цель - помочь ученикам не просто сдать экзамены, а по-настоящему понять и полюбить математику.</p>
-                        <p>С помощью современных методик и индивидуального подхода мы помогаем преодолеть страх перед сложными темами и развиваем математическое мышление.</p>
-                    </div>
+            <div class="menu-section">
+                <h3>Тема оформления</h3>
+                <div class="theme-switch">
+                    <span>Темная тема</span>
+                    <label class="switch">
+                        <input type="checkbox" id="themeToggle" />
+                        <span class="slider"></span>
+                    </label>
                 </div>
-                
-                <div class="block">
-                    <div class="block-header">
-                        <h3>Методика обучения</h3>
-                    </div>
-                    <div class="block-content">
-                        <p>Наша методика основана на трех ключевых принципах: простота объяснения, практическая направленность и адаптивность к уровню ученика.</p>
-                        <p>Мы используем интерактивные материалы, пошаговые решения задач и регулярное тестирование для отслеживания прогресса. Каждая тема сопровождается примерами из реальной жизни.</p>
-                    </div>
+            </div>
+
+            <div class="menu-section">
+                <h3>Социальные сети</h3>
+                <div class="menu-grid">
+                    <a href="#" class="menu-btn">
+                        <div>VK</div>
+                        <span>ВКонтакте</span>
+                    </a>
+                    <a href="#" class="menu-btn">
+                        <div>TG</div>
+                        <span>Telegram</span>
+                    </a>
+                    <a href="#" class="menu-btn">
+                        <div>YT</div>
+                        <span>YouTube</span>
+                    </a>
+                    <a href="#" class="menu-btn">
+                        <div>OK</div>
+                        <span>Одноклассники</span>
+                    </a>
+                    <a href="#" class="menu-btn">
+                        <div>DZ</div>
+                        <span>Дзен</span>
+                    </a>
+                    <a href="#" class="menu-btn">
+                        <div>RU</div>
+                        <span>Рутуб</span>
+                    </a>
+                    <a href="#" class="menu-btn">
+                        <div>TT</div>
+                        <span>TikTok</span>
+                    </a>
+                    <a href="#" class="menu-btn">
+                        <div>IN</div>
+                        <span>Instagram</span>
+                    </a>
                 </div>
-                
-                <div class="block">
-                    <div class="block-header">
-                        <h3>Наши результаты</h3>
-                    </div>
-                    <div class="block-content">
-                        <p>За последние 3 года более 85% наших учеников сдали экзамены на 4 и 5. Средний балл по ОГЭ - 4.7, по ЕГЭ - 82 балла.</p>
-                        <p>Наши выпускники успешно поступают в ведущие технические вузы страны и продолжают развиваться в математических направлениях.</p>
-                    </div>
+            </div>
+
+            <div class="menu-section">
+                <h3>Дополнительные настройки</h3>
+                <div class="menu-grid">
+                    <button class="menu-btn">
+                        <div>🔔</div>
+                        <span>Уведомления</span>
+                    </button>
+                    <button class="menu-btn">
+                        <div>🔒</div>
+                        <span>Безопасность</span>
+                    </button>
+                    <button class="menu-btn">
+                        <div>🌐</div>
+                        <span>Язык</span>
+                    </button>
+                    <button class="menu-btn">
+                        <div>🖨️</div>
+                        <span>Печать</span>
+                    </button>
                 </div>
             </div>
         </div>
-    </section>
 
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-container">
-                <div class="footer-info">
-                    <div class="footer-logo">
-                        <div class="footer-logo-icon">🧪</div>
-                        <div class="footer-logo-text">Formular</div>
-                    </div>
-                    <p>Формула успеха в математике для каждого ученика. Подготовка к ВПР, ОГЭ и ЕГЭ с 5 по 11 классы.</p>
+        <!-- Header -->
+        <header>
+            <div class="container header-container">
+                <div class="logo-container">
+                    <div class="logo-icon">🧪</div>
+                    <div class="logo-text">Формулярка</div>
+                </div>
+
+                <nav>
+                    <ul class="nav-list">
+                        <li>
+                            <a href="/api/show/5">5 класс</a>
+                            <ul class="submenu">
+                                <li><a href="#">Математика</a></li>
+                                <li><a href="#">ВПР</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="/api/show/6">6 класс</a>
+                            <ul class="submenu">
+                                <li><a href="#">Математика</a></li>
+                                <li><a href="#">ВПР</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="/api/show/7">7 класс</a>
+                            <ul class="submenu">
+                                <li><a href="#">Алгебра</a></li>
+                                <li><a href="#">Геометрия</a></li>
+                                <li><a href="#">ВПР</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="/api/show/8">8 класс</a>
+                            <ul class="submenu">
+                                <li><a href="#">Алгебра</a></li>
+                                <li><a href="#">Геометрия</a></li>
+                                <li><a href="#">ВПР</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="/api/show/9">9 класс</a>
+                            <ul class="submenu">
+                                <li><a href="#">Алгебра</a></li>
+                                <li><a href="#">Геометрия</a></li>
+                                <li><a href="#">ОГЭ</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="/api/show/10">10 класс</a>
+                            <ul class="submenu">
+                                <li><a href="#">Алгебра</a></li>
+                                <li><a href="#">Геометрия</a></li>
+                                <li><a href="#">Стереометрия</a></li>
+                                <li><a href="#">ВПР</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="/api/show/11">11 класс</a>
+                            <ul class="submenu">
+                                <li><a href="#">Алгебра</a></li>
+                                <li><a href="#">Геометрия</a></li>
+                                <li><a href="#">Стереометрия</a></li>
+                                <li><a href="#">ЕГЭ</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </nav>
+
+                <div class="header-controls">
+                    <button
+                        class="auth-btn"
+                        id="auth-profile-btn"
+                        onclick="window.location='/loginform'"
+                    >
+                        Войти/Зарегистрироваться
+                    </button>
+                    <button class="settings-btn" id="settingsBtn">⚙️</button>
                 </div>
             </div>
-            
-            <div class="copyright">
-                &copy; 2025 Formular. Все права защищены.
-            </div>
-        </div>
-    </footer>
+        </header>
 
-    <script src="/static/js/main.js"></script>
-</body>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container">
+                <h1>Formular - Математика для каждого</h1>
+                <p>
+                    Эффективная подготовка к урокам, ВПР, ОГЭ и ЕГЭ по
+                    математике для учеников 5-11 классов. Простое объяснение
+                    сложных тем и индивидуальный подход.
+                </p>
+                <a href="#" class="cta-button">Начать обучение</a>
+            </div>
+        </section>
+
+        <!-- Content Section -->
+        <section class="content-section">
+            <div class="container">
+                <h2 class="section-title">О нашем проекте</h2>
+                <div class="blocks-container">
+                    <div class="block">
+                        <div class="block-header">
+                            <h3>Наша миссия</h3>
+                        </div>
+                        <div class="block-content">
+                            <p>
+                                Мы стремимся сделать математику доступной и
+                                понятной для каждого школьника. Наша цель -
+                                помочь ученикам не просто сдать экзамены, а
+                                по-настоящему понять и полюбить математику.
+                            </p>
+                            <p>
+                                С помощью современных методик и индивидуального
+                                подхода мы помогаем преодолеть страх перед
+                                сложными темами и развиваем математическое
+                                мышление.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="block">
+                        <div class="block-header">
+                            <h3>Методика обучения</h3>
+                        </div>
+                        <div class="block-content">
+                            <p>
+                                Наша методика основана на трех ключевых
+                                принципах: простота объяснения, практическая
+                                направленность и адаптивность к уровню ученика.
+                            </p>
+                            <p>
+                                Мы используем интерактивные материалы, пошаговые
+                                решения задач и регулярное тестирование для
+                                отслеживания прогресса. Каждая тема
+                                сопровождается примерами из реальной жизни.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="block">
+                        <div class="block-header">
+                            <h3>Наши результаты</h3>
+                        </div>
+                        <div class="block-content">
+                            <p>
+                                За последние 3 года более 85% наших учеников
+                                сдали экзамены на 4 и 5. Средний балл по ОГЭ -
+                                4.7, по ЕГЭ - 82 балла.
+                            </p>
+                            <p>
+                                Наши выпускники успешно поступают в ведущие
+                                технические вузы страны и продолжают развиваться
+                                в математических направлениях.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <div class="container">
+                <div class="footer-container">
+                    <div class="footer-info">
+                        <div class="footer-logo">
+                            <div class="footer-logo-icon">🧪</div>
+                            <div class="footer-logo-text">Formular</div>
+                        </div>
+                        <p>
+                            Формула успеха в математике для каждого ученика.
+                            Подготовка к ВПР, ОГЭ и ЕГЭ с 5 по 11 классы.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="copyright">
+                    &copy; 2025 Formular. Все права защищены.
+                </div>
+            </div>
+        </footer>
+
+        <script src="/static/js/main.js"></script>
+    </body>
 </html>

@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>{{.name}} - Формулярка</title>
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+        />
+        <style>
+            :root {
+                --primary: #4a6fa5;
+                --secondary: #166088;
+                --accent: #ff6b6b;
+                --light: #f8f9fa;
+                --dark: #212529;
+            }
+
+            body {
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+                color: var(--dark);
+                min-height: 100vh;
+            }
+
+            .variant-container {
+                max-width: 1200px;
+                margin: 40px auto;
+                background: white;
+                border-radius: 15px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }
+
+            .variant-header {
+                background: linear-gradient(
+                    135deg,
+                    var(--primary),
+                    var(--secondary)
+                );
+                color: white;
+                padding: 30px;
+                position: relative;
+            }
+
+            .variant-badge {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                background: rgba(255, 255, 255, 0.2);
+                padding: 8px 15px;
+                border-radius: 20px;
+                font-weight: 600;
+                font-size: 14px;
+            }
+
+            .variant-title {
+                font-size: 32px;
+                font-weight: 700;
+                margin-bottom: 10px;
+            }
+
+            .variant-description {
+                font-size: 18px;
+                opacity: 0.9;
+                margin-bottom: 20px;
+            }
+
+            .variant-meta {
+                display: flex;
+                gap: 20px;
+                flex-wrap: wrap;
+            }
+
+            .meta-item {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                background: rgba(255, 255, 255, 0.2);
+                padding: 8px 15px;
+                border-radius: 8px;
+            }
+
+            .variant-content {
+                padding: 30px;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 30px;
+            }
+
+            @media (max-width: 992px) {
+                .variant-content {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            .pdf-section,
+            .video-section {
+                background: var(--light);
+                border-radius: 10px;
+                padding: 25px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            }
+
+            .section-title {
+                font-size: 22px;
+                margin-bottom: 20px;
+                color: var(--secondary);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .pdf-container {
+                width: 100%;
+                height: 500px;
+                border: 1px solid #e0e0e0;
+                border-radius: 8px;
+                overflow: hidden;
+            }
+
+            .video-container {
+                width: 100%;
+                border-radius: 8px;
+                overflow: hidden;
+                background: #000;
+            }
+
+            .video-player {
+                width: 100%;
+                height: 500px;
+                background: #000;
+            }
+
+            .action-buttons {
+                display: flex;
+                gap: 15px;
+                margin-top: 20px;
+            }
+
+            .btn-primary {
+                background: var(--primary);
+                border: none;
+                padding: 12px 25px;
+                border-radius: 8px;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                transition: all 0.3s;
+            }
+
+            .btn-primary:hover {
+                background: var(--secondary);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .btn-outline {
+                background: transparent;
+                border: 2px solid var(--primary);
+                color: var(--primary);
+                padding: 12px 25px;
+                border-radius: 8px;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                transition: all 0.3s;
+            }
+
+            .btn-outline:hover {
+                background: var(--primary);
+                color: white;
+                transform: translateY(-2px);
+            }
+
+            .no-video {
+                text-align: center;
+                padding: 40px 20px;
+                color: var(--dark);
+                background: #f8f9fa;
+                border-radius: 8px;
+                border: 2px dashed #dee2e6;
+            }
+
+            .no-video i {
+                font-size: 48px;
+                color: #adb5bd;
+                margin-bottom: 15px;
+            }
+
+            .footer {
+                text-align: center;
+                padding: 30px;
+                margin-top: 40px;
+                color: #6c757d;
+                border-top: 1px solid #e9ecef;
+            }
+
+            .logo {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                margin-bottom: 15px;
+                font-weight: 700;
+                font-size: 20px;
+                color: var(--secondary);
+            }
+
+            .logo-icon {
+                width: 30px;
+                height: 30px;
+                background: var(--primary);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="variant-container">
+            <div class="variant-header">
+                <div class="variant-badge">
+                    <i class="fas fa-graduation-cap"></i>
+                    {{.class}} класс
+                </div>
+                <h1 class="variant-title">{{.name}}</h1>
+                <p class="variant-description">{{.description}}</p>
+                <div class="variant-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-file-pdf"></i>
+                        PDF документ
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-id-card"></i>
+                        ID: {{.uuid}}
+                    </div>
+                </div>
+            </div>
+
+            <div class="variant-content">
+                <div class="pdf-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-file-pdf"></i>
+                        PDF вариант
+                    </h3>
+                    <div class="pdf-container">
+                        <iframe
+                            src="/{{.pdf_path}}"
+                            width="100%"
+                            height="100%"
+                            frameborder="0"
+                        ></iframe>
+                    </div>
+                    <div class="action-buttons">
+                        <a href="/{{.pdf_path}}" download class="btn-primary">
+                            <i class="fas fa-download"></i> Скачать PDF
+                        </a>
+                        <a
+                            href="/{{.pdf_path}}"
+                            target="_blank"
+                            class="btn-outline"
+                        >
+                            <i class="fas fa-external-link-alt"></i> Открыть в
+                            новом окне
+                        </a>
+                    </div>
+                </div>
+
+                <div class="video-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-video"></i>
+                        Видеоразбор
+                    </h3>
+
+                    {{if .video_path}}
+                    <div class="video-container">
+                        <video class="video-player" controls>
+                            <source src="/{{.video_path}}" type="video/mp4" />
+                            Ваш браузер не поддерживает видео тег.
+                        </video>
+                    </div>
+                    <div class="action-buttons">
+                        <a href="/{{.video_path}}" download class="btn-primary">
+                            <i class="fas fa-download"></i> Скачать видео
+                        </a>
+                    </div>
+                    {{else}}
+                    <div class="no-video">
+                        <i class="fas fa-video-slash"></i>
+                        <h4>Видеоразбор отсутствует</h4>
+                        <p>Для этого варианта пока нет видеоразбора</p>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+
+            <div class="footer">
+                <div class="logo">
+                    <div class="logo-icon">🧪</div>
+                    Formular
+                </div>
+                <p>Формула успеха в математике для каждого ученика</p>
+            </div>
+        </div>
+
+        <script>
+            // Проверка и обработка видео
+            document.addEventListener("DOMContentLoaded", function () {
+                const videoPath = "/{{.video_path}}";
+                const videoSection = document.querySelector(".video-section");
+                console.log(videoPath);
+                if (!videoPath) {
+                    // Если путь к видео пустой, скрываем кнопку скачивания
+                    const downloadBtn =
+                        videoSection.querySelector(".action-buttons");
+                    if (downloadBtn) {
+                        downloadBtn.style.display = "none";
+                    }
+                } else {
+                    // Проверяем доступность видео
+                    checkVideoAvailability(videoPath);
+                }
+
+                // Добавляем обработчик ошибок видео
+                const videoElement = document.querySelector("video");
+                if (videoElement) {
+                    videoElement.addEventListener("error", function () {
+                        const videoContainer =
+                            document.querySelector(".video-container");
+                        videoContainer.innerHTML = `
+                        <div class="no-video">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h4>Ошибка загрузки видео</h4>
+                            <p>Видеофайл недоступен по указанному пути</p>
+                        </div>
+                    `;
+
+                        const downloadBtn =
+                            videoSection.querySelector(".action-buttons");
+                        if (downloadBtn) {
+                            downloadBtn.style.display = "none";
+                        }
+                    });
+                }
+            });
+
+            // Функция проверки доступности видео
+            function checkVideoAvailability(url) {
+                fetch(url, { method: "HEAD" })
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw new Error("Видео недоступно");
+                        }
+                    })
+                    .catch((error) => {
+                        const videoContainer =
+                            document.querySelector(".video-container");
+                        if (videoContainer) {
+                            videoContainer.innerHTML = `
+                        <div class="no-video">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h4>Ошибка загрузки видео</h4>
+                            <p>Видеофайл недоступен по указанному пути</p>
+                        </div>
+                    `;
+
+                            const downloadBtn = document.querySelector(
+                                ".video-section .action-buttons",
+                            );
+                            if (downloadBtn) {
+                                downloadBtn.style.display = "none";
+                            }
+                        }
+                    });
+            }
+        </script>
+    </body>
+</html>

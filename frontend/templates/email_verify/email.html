@@ -1,557 +1,633 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formular - Подтверждение email</title>
-    <style>
-        :root {
-            --primary: #4a6fa5;
-            --secondary: #166088;
-            --accent: #ff6b6b;
-            --light: #f8f9fa;
-            --dark: #212529;
-            --gray: #6c757d;
-            --success: #28a745;
-            --warning: #ffc107;
-            --danger: #dc3545;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s ease;
-        }
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #4a6fa5, #166088);
-            color: var(--dark);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-            transition: var(--transition);
-        }
-        body.dark-theme {
-            background: linear-gradient(135deg, #1a3a5f, #0d3a56);
-        }
-        .verification-container {
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: var(--shadow);
-            width: 100%;
-            max-width: 500px;
-            overflow: hidden;
-            transition: var(--transition);
-        }
-        body.dark-theme .verification-container {
-            background-color: #1e1e1e;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        }
-        .verification-header {
-            padding: 30px;
-            text-align: center;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-        }
-        body.dark-theme .verification-header {
-            background: linear-gradient(135deg, #1a3a5f, #0d3a56);
-        }
-        .logo-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        .logo-icon {
-            width: 50px;
-            height: 50px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--primary);
-            font-size: 30px;
-            box-shadow: var(--shadow);
-        }
-        .logo-text {
-            font-size: 28px;
-            font-weight: 700;
-            color: white;
-        }
-        .verification-header h1 {
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-        .verification-header p {
-            font-size: 16px;
-            opacity: 0.9;
-            margin-bottom: 5px;
-        }
-        .verification-header .email {
-            font-weight: 600;
-            font-size: 18px;
-            margin-top: 10px;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 5px 15px;
-            border-radius: 20px;
-            display: inline-block;
-        }
-        .verification-content {
-            padding: 30px;
-        }
-        .code-container {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 30px 0;
-        }
-        .code-input {
-            width: 60px;
-            height: 70px;
-            font-size: 32px;
-            text-align: center;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            transition: var(--transition);
-        }
-        body.dark-theme .code-input {
-            background-color: #2d2d2d;
-            border-color: #444;
-            color: #f0f0f0;
-        }
-        .code-input:focus {
-            border-color: var(--primary);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
-            transform: translateY(-3px);
-        }
-        body.dark-theme .code-input:focus {
-            box-shadow: 0 0 0 3px rgba(100, 181, 246, 0.2);
-        }
-        .timer {
-            text-align: center;
-            margin: 20px 0;
-            font-size: 16px;
-        }
-        .timer span {
-            font-weight: 600;
-            color: var(--primary);
-        }
-        body.dark-theme .timer span {
-            color: #64b5f6;
-        }
-        .verify-btn {
-            width: 100%;
-            padding: 15px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            margin-top: 20px;
-        }
-        .verify-btn:hover {
-            background: var(--secondary);
-            transform: translateY(-2px);
-        }
-        .verify-btn:disabled {
-            background: var(--gray);
-            cursor: not-allowed;
-            transform: none;
-        }
-        .resend-link {
-            display: block;
-            text-align: center;
-            margin-top: 20px;
-            color: var(--primary);
-            text-decoration: none;
-            transition: var(--transition);
-            cursor: pointer;
-            font-weight: 500;
-        }
-        body.dark-theme .resend-link {
-            color: #64b5f6;
-        }
-        .resend-link:hover {
-            text-decoration: underline;
-        }
-        .resend-link.disabled {
-            color: var(--gray);
-            cursor: not-allowed;
-        }
-        .resend-link.disabled:hover {
-            text-decoration: none;
-        }
-        .status-message {
-            text-align: center;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-            display: none;
-        }
-        .status-message.success {
-            background: rgba(40, 167, 69, 0.1);
-            color: var(--success);
-            display: block;
-        }
-        .status-message.error {
-            background: rgba(220, 53, 69, 0.1);
-            color: var(--danger);
-            display: block;
-        }
-        .back-link {
-            display: block;
-            text-align: center;
-            margin-top: 25px;
-            color: var(--gray);
-            text-decoration: none;
-            transition: var(--transition);
-        }
-        .back-link:hover {
-            color: var(--primary);
-        }
-        body.dark-theme .back-link:hover {
-            color: #64b5f6;
-        }
-        /* Анимации */
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-5px); }
-            40%, 80% { transform: translateX(5px); }
-        }
-        .shake {
-            animation: shake 0.5s ease-in-out;
-        }
-        /* Responsive */
-        @media (max-width: 576px) {
-            .verification-header {
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Формулярка - Подтверждение email</title>
+        <style>
+            :root {
+                --primary: #4a6fa5;
+                --secondary: #166088;
+                --accent: #ff6b6b;
+                --light: #f8f9fa;
+                --dark: #212529;
+                --gray: #6c757d;
+                --success: #28a745;
+                --warning: #ffc107;
+                --danger: #dc3545;
+                --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                --transition: all 0.3s ease;
+            }
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            body {
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #4a6fa5, #166088);
+                color: var(--dark);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
                 padding: 20px;
+                transition: var(--transition);
+            }
+            body.dark-theme {
+                background: linear-gradient(135deg, #1a3a5f, #0d3a56);
+            }
+            .verification-container {
+                background-color: white;
+                border-radius: 10px;
+                box-shadow: var(--shadow);
+                width: 100%;
+                max-width: 500px;
+                overflow: hidden;
+                transition: var(--transition);
+            }
+            body.dark-theme .verification-container {
+                background-color: #1e1e1e;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            }
+            .verification-header {
+                padding: 30px;
+                text-align: center;
+                background: linear-gradient(
+                    135deg,
+                    var(--primary),
+                    var(--secondary)
+                );
+                color: white;
+            }
+            body.dark-theme .verification-header {
+                background: linear-gradient(135deg, #1a3a5f, #0d3a56);
+            }
+            .logo-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 12px;
+                margin-bottom: 20px;
+            }
+            .logo-icon {
+                width: 50px;
+                height: 50px;
+                background: white;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: var(--primary);
+                font-size: 30px;
+                box-shadow: var(--shadow);
+            }
+            .logo-text {
+                font-size: 28px;
+                font-weight: 700;
+                color: white;
+            }
+            .verification-header h1 {
+                font-size: 24px;
+                margin-bottom: 10px;
+            }
+            .verification-header p {
+                font-size: 16px;
+                opacity: 0.9;
+                margin-bottom: 5px;
+            }
+            .verification-header .email {
+                font-weight: 600;
+                font-size: 18px;
+                margin-top: 10px;
+                background: rgba(255, 255, 255, 0.2);
+                padding: 5px 15px;
+                border-radius: 20px;
+                display: inline-block;
             }
             .verification-content {
-                padding: 20px;
+                padding: 30px;
             }
             .code-container {
-                gap: 10px;
+                display: flex;
+                justify-content: center;
+                gap: 15px;
+                margin: 30px 0;
             }
             .code-input {
-                width: 50px;
-                height: 60px;
-                font-size: 28px;
+                width: 60px;
+                height: 70px;
+                font-size: 32px;
+                text-align: center;
+                border: 2px solid #ddd;
+                border-radius: 8px;
+                transition: var(--transition);
             }
-        }
-    </style>
-</head>
-<body>
-    <div class="verification-container">
-        <div class="verification-header">
-            <div class="logo-container">
-                <div class="logo-icon">🧪</div>
-                <div class="logo-text">Formular</div>
-            </div>
-            <h1>Подтверждение email</h1>
-            <p>Мы отправили 6-значный код на вашу электронную почту</p>
-        </div>
-        <div class="verification-content">
-            <p>Пожалуйста, введите код подтверждения, который вы получили по электронной почте. Этот код действителен в течение <span class="timer" id="timer">05:00</span> минут.</p>
-            <form id="verificationForm">
-                <!-- Скрытое поле для хранения email из URL -->
-                <input type="hidden" id="verification-email" name="email">
-                
-                <div class="code-container">
-                    <input type="text" class="code-input" maxlength="1" data-index="0">
-                    <input type="text" class="code-input" maxlength="1" data-index="1">
-                    <input type="text" class="code-input" maxlength="1" data-index="2">
-                    <input type="text" class="code-input" maxlength="1" data-index="3">
-                    <input type="text" class="code-input" maxlength="1" data-index="4">
-                    <input type="text" class="code-input" maxlength="1" data-index="5">
+            body.dark-theme .code-input {
+                background-color: #2d2d2d;
+                border-color: #444;
+                color: #f0f0f0;
+            }
+            .code-input:focus {
+                border-color: var(--primary);
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
+                transform: translateY(-3px);
+            }
+            body.dark-theme .code-input:focus {
+                box-shadow: 0 0 0 3px rgba(100, 181, 246, 0.2);
+            }
+            .timer {
+                text-align: center;
+                margin: 20px 0;
+                font-size: 16px;
+            }
+            .timer span {
+                font-weight: 600;
+                color: var(--primary);
+            }
+            body.dark-theme .timer span {
+                color: #64b5f6;
+            }
+            .verify-btn {
+                width: 100%;
+                padding: 15px;
+                background: var(--primary);
+                color: white;
+                border: none;
+                border-radius: 6px;
+                font-size: 18px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: var(--transition);
+                margin-top: 20px;
+            }
+            .verify-btn:hover {
+                background: var(--secondary);
+                transform: translateY(-2px);
+            }
+            .verify-btn:disabled {
+                background: var(--gray);
+                cursor: not-allowed;
+                transform: none;
+            }
+            .resend-link {
+                display: block;
+                text-align: center;
+                margin-top: 20px;
+                color: var(--primary);
+                text-decoration: none;
+                transition: var(--transition);
+                cursor: pointer;
+                font-weight: 500;
+            }
+            body.dark-theme .resend-link {
+                color: #64b5f6;
+            }
+            .resend-link:hover {
+                text-decoration: underline;
+            }
+            .resend-link.disabled {
+                color: var(--gray);
+                cursor: not-allowed;
+            }
+            .resend-link.disabled:hover {
+                text-decoration: none;
+            }
+            .status-message {
+                text-align: center;
+                padding: 15px;
+                border-radius: 8px;
+                margin-top: 20px;
+                display: none;
+            }
+            .status-message.success {
+                background: rgba(40, 167, 69, 0.1);
+                color: var(--success);
+                display: block;
+            }
+            .status-message.error {
+                background: rgba(220, 53, 69, 0.1);
+                color: var(--danger);
+                display: block;
+            }
+            .back-link {
+                display: block;
+                text-align: center;
+                margin-top: 25px;
+                color: var(--gray);
+                text-decoration: none;
+                transition: var(--transition);
+            }
+            .back-link:hover {
+                color: var(--primary);
+            }
+            body.dark-theme .back-link:hover {
+                color: #64b5f6;
+            }
+            /* Анимации */
+            @keyframes shake {
+                0%,
+                100% {
+                    transform: translateX(0);
+                }
+                20%,
+                60% {
+                    transform: translateX(-5px);
+                }
+                40%,
+                80% {
+                    transform: translateX(5px);
+                }
+            }
+            .shake {
+                animation: shake 0.5s ease-in-out;
+            }
+            /* Responsive */
+            @media (max-width: 576px) {
+                .verification-header {
+                    padding: 20px;
+                }
+                .verification-content {
+                    padding: 20px;
+                }
+                .code-container {
+                    gap: 10px;
+                }
+                .code-input {
+                    width: 50px;
+                    height: 60px;
+                    font-size: 28px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="verification-container">
+            <div class="verification-header">
+                <div class="logo-container">
+                    <div class="logo-icon">🧪</div>
+                    <div class="logo-text">Формулярка</div>
                 </div>
-                <div class="status-message" id="statusMessage"></div>
-                <button type="submit" class="verify-btn" id="verifyBtn" disabled>Подтвердить</button>
-                <div class="resend-link disabled" id="resendLink">Отправить код повторно</div>
-                <a href="auth.html" class="back-link">Вернуться на страницу входа</a>
-            </form>
+                <h1>Подтверждение email</h1>
+                <p>Мы отправили 6-значный код на вашу электронную почту</p>
+            </div>
+            <div class="verification-content">
+                <p>
+                    Пожалуйста, введите код подтверждения, который вы получили
+                    по электронной почте. Этот код действителен в течение
+                    <span class="timer" id="timer">05:00</span> минут.
+                </p>
+                <form id="verificationForm">
+                    <!-- Скрытое поле для хранения email из URL -->
+                    <input type="hidden" id="verification-email" name="email" />
+
+                    <div class="code-container">
+                        <input
+                            type="text"
+                            class="code-input"
+                            maxlength="1"
+                            data-index="0"
+                        />
+                        <input
+                            type="text"
+                            class="code-input"
+                            maxlength="1"
+                            data-index="1"
+                        />
+                        <input
+                            type="text"
+                            class="code-input"
+                            maxlength="1"
+                            data-index="2"
+                        />
+                        <input
+                            type="text"
+                            class="code-input"
+                            maxlength="1"
+                            data-index="3"
+                        />
+                        <input
+                            type="text"
+                            class="code-input"
+                            maxlength="1"
+                            data-index="4"
+                        />
+                        <input
+                            type="text"
+                            class="code-input"
+                            maxlength="1"
+                            data-index="5"
+                        />
+                    </div>
+                    <div class="status-message" id="statusMessage"></div>
+                    <button
+                        type="submit"
+                        class="verify-btn"
+                        id="verifyBtn"
+                        disabled
+                    >
+                        Подтвердить
+                    </button>
+                    <div class="resend-link disabled" id="resendLink">
+                        Отправить код повторно
+                    </div>
+                    <a href="auth.html" class="back-link"
+                        >Вернуться на страницу входа</a
+                    >
+                </form>
+            </div>
         </div>
-    </div>
-    
-    <script>
-        // Элементы DOM
-        const codeInputs = document.querySelectorAll('.code-input');
-        const verifyBtn = document.getElementById('verifyBtn');
-        const resendLink = document.getElementById('resendLink');
-        const timerElement = document.getElementById('timer');
-        const statusMessage = document.getElementById('statusMessage');
-        const verificationForm = document.getElementById('verificationForm');
-        const emailDisplay = document.querySelector('.verification-header .email');
-        const verificationEmail = document.getElementById('verification-email');
-        
-        
-        // Инициализация страницы
-        document.addEventListener('DOMContentLoaded', () => {
-            // Получаем email из URL
-            const email = getEmailFromUrl();
-            
-            if (email) {
-                // Отображаем email в интерфейсе
-                emailDisplay.textContent = email;
-                // Сохраняем email в скрытое поле формы
-                verificationEmail.value = email;
-                
-                // Установка фокуса на первое поле
-                codeInputs[0].focus();
-                // Запуск таймера
-                startTimer();
-                
-                // Блокируем ссылку на повторную отправку на 30 секунд
-                setTimeout(() => {
-                    resendLink.classList.remove('disabled');
-                }, 30000);
-            } else {
-                // Если email не передан в URL, показываем ошибку
-                emailDisplay.textContent = "Ошибка: email не указан";
-                emailDisplay.style.background = "rgba(220, 53, 69, 0.2)";
-                statusMessage.textContent = "Ошибка: email не указан. Вернитесь к регистрации.";
-                statusMessage.className = "status-message error";
-                statusMessage.style.display = "block";
-                
-                // Блокируем кнопку подтверждения
-                verifyBtn.disabled = true;
-                resendLink.classList.add('disabled');
-                
-                // Через 5 секунд перенаправляем на страницу регистрации
-                setTimeout(() => {
-                    window.location.href = "auth.html";
-                }, 5000);
-            }
-            
-            // Проверка сохраненной темы
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'dark') {
-                document.body.classList.add('dark-theme');
-            }
-        });
-        
-        // Таймер обратного отсчета
-        let timeLeft = 300; // 5 минут в секундах
-        let timerInterval;
-        
-        // Запуск таймера
-        function startTimer() {
-            clearInterval(timerInterval);
-            timeLeft = 300;
-            updateTimer();
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                updateTimer();
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    resendLink.classList.remove('disabled');
-                    verifyBtn.disabled = true;
-                    statusMessage.textContent = "Срок действия кода истек. Запросите новый код.";
+
+        <script>
+            // Элементы DOM
+            const codeInputs = document.querySelectorAll(".code-input");
+            const verifyBtn = document.getElementById("verifyBtn");
+            const resendLink = document.getElementById("resendLink");
+            const timerElement = document.getElementById("timer");
+            const statusMessage = document.getElementById("statusMessage");
+            const verificationForm =
+                document.getElementById("verificationForm");
+            const emailDisplay = document.querySelector(
+                ".verification-header .email",
+            );
+            const verificationEmail =
+                document.getElementById("verification-email");
+
+            // Инициализация страницы
+            document.addEventListener("DOMContentLoaded", () => {
+                // Получаем email из URL
+                const email = getEmailFromUrl();
+
+                if (email) {
+                    // Отображаем email в интерфейсе
+                    emailDisplay.textContent = email;
+                    // Сохраняем email в скрытое поле формы
+                    verificationEmail.value = email;
+
+                    // Установка фокуса на первое поле
+                    codeInputs[0].focus();
+                    // Запуск таймера
+                    startTimer();
+
+                    // Блокируем ссылку на повторную отправку на 30 секунд
+                    setTimeout(() => {
+                        resendLink.classList.remove("disabled");
+                    }, 30000);
+                } else {
+                    // Если email не передан в URL, показываем ошибку
+                    emailDisplay.textContent = "Ошибка: email не указан";
+                    emailDisplay.style.background = "rgba(220, 53, 69, 0.2)";
+                    statusMessage.textContent =
+                        "Ошибка: email не указан. Вернитесь к регистрации.";
                     statusMessage.className = "status-message error";
                     statusMessage.style.display = "block";
-                }
-            }, 1000);
-        }
-        
-        // Обновление отображения таймера
-        function updateTimer() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        }
-        
-        // Обработка ввода кода
-        codeInputs.forEach((input, index) => {
-            input.addEventListener('input', function() {
-                // Автоматический переход к следующему полю
-                if (this.value && index < codeInputs.length - 1) {
-                    codeInputs[index + 1].focus();
-                }
-                // Проверка заполненности всех полей
-                checkCodeCompletion();
-            });
-            
-            // Обработка клавиш для удобства
-            input.addEventListener('keydown', function(e) {
-                if (e.key === 'Backspace' && !this.value && index > 0) {
-                    codeInputs[index - 1].focus();
-                }
-            });
-        });
-        
-        // Проверка заполненности кода
-        function checkCodeCompletion() {
-            let allFilled = true;
-            codeInputs.forEach(input => {
-                if (!input.value) allFilled = false;
-            });
-            verifyBtn.disabled = !allFilled;
-            return allFilled;
-        }
-        
-        // Отправка формы
-        verificationForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            // Проверяем, есть ли email
-            const email = verificationEmail.value;
-            if (!email) {
-                statusMessage.textContent = "Ошибка: email не указан. Вернитесь к регистрации.";
-                statusMessage.className = "status-message error";
-                statusMessage.style.display = "block";
-                return;
-            }
-            
-            // Сбор кода из полей ввода
 
-            
-            // Отправка кода и email на сервер
-            try {
-                statusMessage.textContent = "Проверка кода...";
-                statusMessage.className = "status-message";
-                statusMessage.style.display = "block";
-                verifyBtn.disabled = true;
-                const urlParams = new URLSearchParams(window.location.search);
-                const email = urlParams.get('email');
-                
-                let code = '';
-                codeInputs.forEach(input => {
-                    code += input.value;
-                });
-                const response = await fetch("/api/verify/email", {
-                    method: "POST",
-                    headers: {
-                        'X-XSRF-TOKEN': getCookie('XSRF-TOKEN'),
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        email: email,
-                        code: code
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (response.ok) {
-                    // Успешная верификация
-                    statusMessage.textContent = "Email успешно подтверждён! Перенаправляем на главную страницу";
-                    statusMessage.className = "status-message success";
-                    
-                    
+                    // Блокируем кнопку подтверждения
+                    verifyBtn.disabled = true;
+                    resendLink.classList.add("disabled");
+
+                    // Через 5 секунд перенаправляем на страницу регистрации
                     setTimeout(() => {
-                        window.location.href = '/';
-                    }, 2000);
-                } else {
-                    // Ошибка верификации
-                    statusMessage.textContent = result.error || "Неверный код подтверждения. Пожалуйста, попробуйте снова.";
+                        window.location.href = "auth.html";
+                    }, 5000);
+                }
+
+                // Проверка сохраненной темы
+                const savedTheme = localStorage.getItem("theme");
+                if (savedTheme === "dark") {
+                    document.body.classList.add("dark-theme");
+                }
+            });
+
+            // Таймер обратного отсчета
+            let timeLeft = 300; // 5 минут в секундах
+            let timerInterval;
+
+            // Запуск таймера
+            function startTimer() {
+                clearInterval(timerInterval);
+                timeLeft = 300;
+                updateTimer();
+                timerInterval = setInterval(() => {
+                    timeLeft--;
+                    updateTimer();
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        resendLink.classList.remove("disabled");
+                        verifyBtn.disabled = true;
+                        statusMessage.textContent =
+                            "Срок действия кода истек. Запросите новый код.";
+                        statusMessage.className = "status-message error";
+                        statusMessage.style.display = "block";
+                    }
+                }, 1000);
+            }
+
+            // Обновление отображения таймера
+            function updateTimer() {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerElement.textContent = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+            }
+
+            // Обработка ввода кода
+            codeInputs.forEach((input, index) => {
+                input.addEventListener("input", function () {
+                    // Автоматический переход к следующему полю
+                    if (this.value && index < codeInputs.length - 1) {
+                        codeInputs[index + 1].focus();
+                    }
+                    // Проверка заполненности всех полей
+                    checkCodeCompletion();
+                });
+
+                // Обработка клавиш для удобства
+                input.addEventListener("keydown", function (e) {
+                    if (e.key === "Backspace" && !this.value && index > 0) {
+                        codeInputs[index - 1].focus();
+                    }
+                });
+            });
+
+            // Проверка заполненности кода
+            function checkCodeCompletion() {
+                let allFilled = true;
+                codeInputs.forEach((input) => {
+                    if (!input.value) allFilled = false;
+                });
+                verifyBtn.disabled = !allFilled;
+                return allFilled;
+            }
+
+            // Отправка формы
+            verificationForm.addEventListener("submit", async function (e) {
+                e.preventDefault();
+
+                // Проверяем, есть ли email
+                const email = verificationEmail.value;
+                if (!email) {
+                    statusMessage.textContent =
+                        "Ошибка: email не указан. Вернитесь к регистрации.";
                     statusMessage.className = "status-message error";
-                    
-                    // Анимация ошибки
-                    codeInputs.forEach(input => {
-                        input.classList.add('shake');
-                        setTimeout(() => input.classList.remove('shake'), 500);
+                    statusMessage.style.display = "block";
+                    return;
+                }
+
+                // Сбор кода из полей ввода
+
+                // Отправка кода и email на сервер
+                try {
+                    statusMessage.textContent = "Проверка кода...";
+                    statusMessage.className = "status-message";
+                    statusMessage.style.display = "block";
+                    verifyBtn.disabled = true;
+                    const urlParams = new URLSearchParams(
+                        window.location.search,
+                    );
+                    const email = urlParams.get("email");
+
+                    let code = "";
+                    codeInputs.forEach((input) => {
+                        code += input.value;
                     });
-                    
-                    // Очистка полей
+                    const response = await fetch("/api/verify/email", {
+                        method: "POST",
+                        headers: {
+                            "X-XSRF-TOKEN": getCookie("XSRF-TOKEN"),
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            email: email,
+                            code: code,
+                        }),
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        // Успешная верификация
+                        statusMessage.textContent =
+                            "Email успешно подтверждён! Перенаправляем на главную страницу";
+                        statusMessage.className = "status-message success";
+
+                        setTimeout(() => {
+                            window.location.href = "/";
+                        }, 2000);
+                    } else {
+                        // Ошибка верификации
+                        statusMessage.textContent =
+                            result.error ||
+                            "Неверный код подтверждения. Пожалуйста, попробуйте снова.";
+                        statusMessage.className = "status-message error";
+
+                        // Анимация ошибки
+                        codeInputs.forEach((input) => {
+                            input.classList.add("shake");
+                            setTimeout(
+                                () => input.classList.remove("shake"),
+                                500,
+                            );
+                        });
+
+                        // Очистка полей
+                        setTimeout(() => {
+                            codeInputs.forEach((input) => {
+                                input.value = "";
+                            });
+                            codeInputs[0].focus();
+                            verifyBtn.disabled = true;
+                        }, 500);
+                    }
+                } catch (error) {
+                    statusMessage.textContent =
+                        "Ошибка соединения с сервером. Попробуйте позже.";
+                    statusMessage.className = "status-message error";
+                    console.error("Verification error:", error);
+
                     setTimeout(() => {
-                        codeInputs.forEach(input => {
-                            input.value = '';
+                        codeInputs.forEach((input) => {
+                            input.value = "";
                         });
                         codeInputs[0].focus();
                         verifyBtn.disabled = true;
                     }, 500);
                 }
-            } catch (error) {
-                statusMessage.textContent = "Ошибка соединения с сервером. Попробуйте позже.";
-                statusMessage.className = "status-message error";
-                console.error("Verification error:", error);
-                
-                setTimeout(() => {
-                    codeInputs.forEach(input => {
-                        input.value = '';
-                    });
-                    codeInputs[0].focus();
-                    verifyBtn.disabled = true;
-                }, 500);
-            }
-        });
-        
-        // Повторная отправка кода
-        resendLink.addEventListener('click', async function() {
-            if (this.classList.contains('disabled')) return;
-            
-            const email = verificationEmail.value;
-            if (!email) {
-                statusMessage.textContent = "Ошибка: email не указан. Вернитесь к регистрации.";
-                statusMessage.className = "status-message error";
-                statusMessage.style.display = "block";
-                return;
-            }
-            
-            try {
-                statusMessage.textContent = "Отправка нового кода...";
-                statusMessage.className = "status-message";
-                statusMessage.style.display = "block";
-                this.classList.add('disabled');
-                verifyBtn.disabled = true;
-                
-                const response = await fetch("/api/resend-verification", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ email: email })
-                });
-                
-                if (response.ok) {
-                    statusMessage.textContent = "Новый код подтверждения отправлен на ваш email!";
-                    statusMessage.className = "status-message success";
-                    
-                    // Очистка полей
-                    codeInputs.forEach(input => {
-                        input.value = '';
-                    });
-                    codeInputs[0].focus();
-                    
-                    // Перезапуск таймера
-                    startTimer();
-                    
-                    // Снятие блокировки через 30 секунд
-                    setTimeout(() => {
-                        resendLink.classList.remove('disabled');
-                    }, 30000);
-                } else {
-                    const result = await response.json();
-                    statusMessage.textContent = result.error || "Не удалось отправить новый код. Попробуйте позже.";
+            });
+
+            // Повторная отправка кода
+            resendLink.addEventListener("click", async function () {
+                if (this.classList.contains("disabled")) return;
+
+                const email = verificationEmail.value;
+                if (!email) {
+                    statusMessage.textContent =
+                        "Ошибка: email не указан. Вернитесь к регистрации.";
                     statusMessage.className = "status-message error";
-                    
+                    statusMessage.style.display = "block";
+                    return;
+                }
+
+                try {
+                    statusMessage.textContent = "Отправка нового кода...";
+                    statusMessage.className = "status-message";
+                    statusMessage.style.display = "block";
+                    this.classList.add("disabled");
+                    verifyBtn.disabled = true;
+
+                    const response = await fetch("/api/resend-verification", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ email: email }),
+                    });
+
+                    if (response.ok) {
+                        statusMessage.textContent =
+                            "Новый код подтверждения отправлен на ваш email!";
+                        statusMessage.className = "status-message success";
+
+                        // Очистка полей
+                        codeInputs.forEach((input) => {
+                            input.value = "";
+                        });
+                        codeInputs[0].focus();
+
+                        // Перезапуск таймера
+                        startTimer();
+
+                        // Снятие блокировки через 30 секунд
+                        setTimeout(() => {
+                            resendLink.classList.remove("disabled");
+                        }, 30000);
+                    } else {
+                        const result = await response.json();
+                        statusMessage.textContent =
+                            result.error ||
+                            "Не удалось отправить новый код. Попробуйте позже.";
+                        statusMessage.className = "status-message error";
+
+                        // Возвращаем возможность отправки
+                        this.classList.remove("disabled");
+                        verifyBtn.disabled = false;
+                    }
+                } catch (error) {
+                    statusMessage.textContent =
+                        "Ошибка соединения с сервером. Попробуйте позже.";
+                    statusMessage.className = "status-message error";
+                    console.error("Resend error:", error);
+
                     // Возвращаем возможность отправки
-                    this.classList.remove('disabled');
+                    this.classList.remove("disabled");
                     verifyBtn.disabled = false;
                 }
-            } catch (error) {
-                statusMessage.textContent = "Ошибка соединения с сервером. Попробуйте позже.";
-                statusMessage.className = "status-message error";
-                console.error("Resend error:", error);
-                
-                // Возвращаем возможность отправки
-                this.classList.remove('disabled');
-                verifyBtn.disabled = false;
+            });
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(";").shift();
             }
-        });
-        function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
-    }
-    </script>
-</body>
+        </script>
+    </body>
 </html>

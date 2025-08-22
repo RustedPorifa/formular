@@ -64,7 +64,9 @@ func main() {
 	router.SetTrustedProxies(nil)
 	//router.Use(middleware.GeoIPMiddleware(db))
 	router.LoadHTMLGlob("frontend/templates/**/*.html")
+	//statics
 	router.Static("/static", "frontend/static")
+	router.Static("/assets", "./frontend/templates/math")
 
 	//404
 	router.NoRoute(func(c *gin.Context) {
@@ -78,6 +80,11 @@ func main() {
 	//CSRF GROUP
 	csrfGroup := router.Group("/api")
 	csrfGroup.Use(middleware.CSRFMiddleware())
+	//variants
+	csrfGroup.GET("/show/:grade", showHandler)
+	csrfGroup.GET("/variants/:grade", reader.HandleGetVariant)
+	csrfGroup.GET("/get-variant/:uuid", middleware.VariantsMiddleware(), reader.HandleVariantSearch)
+	//auth
 	csrfGroup.GET("/verify-email", verifyHandler)
 	csrfGroup.POST("/verify/email", auth.HandleEmailVerify)
 	csrfGroup.POST("/register", auth.HandleRegister)
@@ -91,9 +98,8 @@ func main() {
 	paymentGroup.POST("success")
 	paymentGroup.POST("fail")
 	//variants
-	variantsGroup := router.Group("/variants")
-	variantsGroup.GET("/get/:grade", reader.HandleGetVariant)
-	variantsGroup.GET("/show/:grade", showHandler)
+	//variantsGroup := router.Group("/variants")
+	//variantsGroup.GET("/show/:grade", showHandler)
 	//AUTHORIZED ONLY
 	authorizedGroup := router.Group("/user")
 	authorizedGroup.Use(middleware.AuthMiddleware())

@@ -1,8 +1,10 @@
 package middleware
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	godb "formular/backend/database/SQL_postgre"
 	csrfgenerator "formular/backend/utils/csrfGenerator"
 	"formular/backend/utils/jwtconfigurator"
 	"formular/backend/utils/tokenchecker"
@@ -11,6 +13,7 @@ import (
 	"net/http"
 	"net/url"
 	"slices"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -141,25 +144,36 @@ func AdminMiddleware() gin.HandlerFunc {
 	}
 }
 
-func variantsHandler() gin.HandlerFunc {
+func VariantsMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		grade := c.Param("grade")
-		isSolved := c.Param("isSolved")
-		if isSolved == "solved" {
-			user_info, checkErr := tokenchecker.ValidateAccessTokenWithRefresh(c)
-			if checkErr != nil {
-				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
-				return
+		uuid_variant := c.Param("uuid")
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		variant_info, dbErr := godb.GetVariantByUUID(ctx, uuid_variant)
+		if dbErr != nil {
+			log.Println(dbErr)
+			c.Abort()
+			c.HTML(http.StatusNotFound, "404.html", gin.H{})
+		}
+		defer cancel()
+		if variant_info == nil {
+			c.Abort()
+			c.HTML(http.StatusNotFound, "404.html", gin.H{})
+		}
+		println(variant_info.Solved, variant_info.UUID)
+		if variant_info.Solved {
+			user_info, usErr := tokenchecker.ValidateAccessTokenWithRefresh(c)
+			if usErr != nil {
+				log.Println(usErr)
+				c.Abort()
+				c.HTML(http.StatusUnauthorized, "403.html", gin.H{})
 			}
-			if slices.Contains(user_info.PurchasedGrades, grade) {
+			if slices.Contains(user_info.PurchasedGrades, variant_info.Class) {
 				c.Next()
 			} else {
-				c.HTML(http.StatusForbidden, "403_pay.html", gin.H{})
 				c.Abort()
-				return
+				c.HTML(http.StatusUnauthorized, "403_pay.html", gin.H{})
 			}
 		}
-
 	}
 }
 

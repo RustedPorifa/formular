@@ -1,26 +1,105 @@
 class VariantsManager {
   constructor() {
     this.variantsHolder = document.getElementById("variants-holder");
-    this.apiUrl = "/api/variants"; // Измените на ваш реальный endpoint
+    this.currentClass = this.extractClassFromUrl();
+    this.apiUrl = this.buildApiUrl();
     this.init();
   }
 
+  // Извлекаем класс из URL (например: http://127.0.0.1:5050/api/show/7 -> "7")
+  extractClassFromUrl() {
+    const pathSegments = window.location.pathname.split("/");
+
+    // Ищем сегмент с классом после /api/show/
+    const showIndex = pathSegments.indexOf("show");
+    if (showIndex !== -1 && showIndex + 1 < pathSegments.length) {
+      return pathSegments[showIndex + 1];
+    }
+
+    // Альтернативный вариант: последний сегмент URL
+    return pathSegments[pathSegments.length - 1];
+  }
+
+  // Строим URL для API запроса
+  buildApiUrl() {
+    if (this.currentClass && this.currentClass.match(/^\d+$/)) {
+      return `/api/variants/${this.currentClass}`;
+    }
+    return "/api/variants"; // Все варианты если класс не указан
+  }
+
   init() {
+    this.updatePageTitle();
+    this.checkAuthAndUpdateProfile();
     this.loadVariants();
     this.setupEventListeners();
+  }
+
+  // Проверка авторизации и обновление профиля
+  async checkAuthAndUpdateProfile() {
+    try {
+      const response = await fetch("/verify", {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.verify === "true") {
+          this.updateProfileButton();
+        }
+      }
+    } catch (error) {
+      console.error("Ошибка при проверке аутентификации:", error);
+    }
+  }
+
+  // Обновление кнопки профиля
+  updateProfileButton() {
+    const authBtn = document.getElementById("auth-profile-btn");
+    if (!authBtn) return;
+
+    authBtn.onclick = function () {
+      window.location = "/user/profile";
+    };
+    authBtn.textContent = "Профиль";
+  }
+
+  // Обновляем заголовок страницы с учетом класса
+  updatePageTitle() {
+    if (this.currentClass && this.currentClass.match(/^\d+$/)) {
+      document.title = `Formular - ${this.currentClass} класс`;
+
+      // Также можно обновить заголовок на странице
+      const pageHeader = document.querySelector("h1");
+      if (pageHeader) {
+        pageHeader.textContent = `Варианты для ${this.currentClass} класса`;
+      }
+    }
   }
 
   async loadVariants() {
     try {
       this.showLoading();
+      console.log(
+        `Загрузка вариантов для класса: ${this.currentClass || "все"}`,
+      );
 
       const response = await fetch(this.apiUrl);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
 
-      if (data.success) {
-        this.renderVariants(data.variants);
+      // Обрабатываем оба формата ответа: с success полем и без
+      let variants = data.variants || data;
+
+      if (Array.isArray(variants)) {
+        this.renderVariants(variants);
       } else {
-        this.showError(data.error || "Ошибка загрузки вариантов");
+        this.showError("Неверный формат данных от сервера");
       }
     } catch (error) {
       console.error("Ошибка загрузки вариантов:", error);
@@ -34,7 +113,17 @@ class VariantsManager {
       return;
     }
 
-    const variantsHTML = variants
+    // Фильтруем варианты по классу (на случай если API вернул все)
+    const filteredVariants = this.currentClass
+      ? variants.filter((variant) => variant.class === this.currentClass)
+      : variants;
+
+    if (filteredVariants.length === 0) {
+      this.showEmptyStateForClass();
+      return;
+    }
+
+    const variantsHTML = filteredVariants
       .map((variant) => this.createVariantCard(variant))
       .join("");
 
@@ -80,24 +169,24 @@ class VariantsManager {
                 }
 
                 <div class="variant-actions">
-                    <a href="/api/download/pdf/${variant.uuid}"
+                    <a href="/api/get-variant/${variant.uuid}"
                        class="action-btn action-btn-primary"
-                       download="${variant.name}.pdf">
-                        📄 Скачать PDF
+                       target="_blank">
+                        👁️ Просмотреть вариант
                     </a>
-
-                    ${
-                      hasVideo
-                        ? `
-                        <a href="/api/download/video/${variant.uuid}"
-                           class="action-btn action-btn-secondary"
-                           download="${variant.name}.mp4">
-                            🎥 Смотреть видео
-                        </a>
-                    `
-                        : ""
-                    }
                 </div>
+            </div>
+        `;
+  }
+
+  showEmptyStateForClass() {
+    this.variantsHolder.innerHTML = `
+            <div class="empty-state">
+                <h3>📝 Варианты не найдены</h3>
+                <p>Для ${this.currentClass} класса пока нет доступных вариантов</p>
+                <button onclick="window.location='/variants'" class="action-btn action-btn-primary" style="margin-top: 1rem;">
+                    👀 Посмотреть все варианты
+                </button>
             </div>
         `;
   }
@@ -107,7 +196,6 @@ class VariantsManager {
 
     cards.forEach((card) => {
       card.addEventListener("click", (e) => {
-        // Предотвращаем срабатывание при клике на кнопки
         if (!e.target.closest(".action-btn")) {
           const uuid = card.dataset.uuid;
           this.showVariantDetails(uuid);
@@ -117,15 +205,15 @@ class VariantsManager {
   }
 
   showVariantDetails(uuid) {
-    // Здесь можно реализовать модальное окно с деталями
-    console.log("Показать детали варианта:", uuid);
-    // window.open(`/variant/${uuid}`, '_blank');
+    // Открываем вариант в новой вкладке
+    window.open(`/api/get-variant/${uuid}`, "_blank");
   }
 
   showLoading() {
     this.variantsHolder.innerHTML = `
             <div class="loading">
                 <div class="loading-spinner"></div>
+                <p style="margin-top: 1rem;">Загрузка вариантов для ${this.currentClass || "всех"} классов...</p>
             </div>
         `;
   }
@@ -158,21 +246,12 @@ class VariantsManager {
   }
 
   setupEventListeners() {
-    // Обработчик для обновления по кнопке
     document.addEventListener("keydown", (e) => {
       if (e.key === "r" && e.ctrlKey) {
         e.preventDefault();
         this.loadVariants();
       }
     });
-
-    // Авто-обновление каждые 5 минут
-    setInterval(
-      () => {
-        this.loadVariants();
-      },
-      5 * 60 * 1000,
-    );
   }
 }
 
@@ -181,14 +260,13 @@ document.addEventListener("DOMContentLoaded", () => {
   new VariantsManager();
 });
 
-// Глобальные функции для ручного управления
+// Глобальные функции
 window.VariantsManager = {
   refresh: function () {
     new VariantsManager().loadVariants();
   },
 
   filterByClass: function (className) {
-    // Можно добавить фильтрацию по классу
-    console.log("Фильтр по классу:", className);
+    window.location.href = `/api/variants/${className}`;
   },
 };

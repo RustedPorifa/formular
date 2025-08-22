@@ -54,6 +54,8 @@ func UploadHandler(c *gin.Context) {
 		var type_of_variant string
 		println("Type of variant: ", variant.Subject)
 		switch variant.Subject {
+		case "математика":
+			type_of_variant = "math"
 		case "алгебра":
 			type_of_variant = "algebra"
 		case "впр":
@@ -72,29 +74,49 @@ func UploadHandler(c *gin.Context) {
 			return
 		}
 		println(type_of_variant)
-		path_to_сreate := fmt.Sprintf("frontend/templates/math/%s/%s", variant.Class, type_of_variant)
-		println(path_to_сreate)
-		dirCreateErr := os.MkdirAll(path_to_сreate+"/"+uuid, 0777)
+
+		// Create directory for the variant
+		physical_dir_path := fmt.Sprintf("frontend/templates/math/%s/%s/%s", variant.Class, type_of_variant, uuid)
+		println("Creating directory:", physical_dir_path)
+		dirCreateErr := os.MkdirAll(physical_dir_path, 0777)
 		if dirCreateErr != nil {
 			log.Println(dirCreateErr)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка создания директории: " + dirCreateErr.Error()})
 			return
 		}
-		path_to_variant := filepath.Join(path_to_сreate, uuid)
-		println(path_to_variant)
-		uploadErr := c.SaveUploadedFile(variant.PDFFile, path_to_variant+"/"+variant.PDFFile.Filename)
-		if uploadErr != nil {
-			log.Println(uploadErr)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка загрузки файла: " + uploadErr.Error()})
-			return
+
+		// URL base path for database (matches static serving configuration)
+		url_base_path := filepath.Join("assets", variant.Class, type_of_variant, uuid)
+		println("URL base path:", url_base_path)
+
+		// Save PDF file with custom name "kim.pdf"
+		pdf_physical_path := physical_dir_path + "/kim.pdf"
+		if variant.PDFFile != nil {
+			uploadErr := c.SaveUploadedFile(variant.PDFFile, pdf_physical_path)
+			if uploadErr != nil {
+				log.Println(uploadErr)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка загрузки PDF файла: " + uploadErr.Error()})
+				return
+			}
 		}
-		var videoFilePath string
-		videoErr := c.SaveUploadedFile(variant.VideoFile, path_to_variant+"/"+variant.VideoFile.Filename)
-		if videoErr != nil && variant.VideoFile.Filename == "" {
-			videoFilePath = ""
+		pdf_url_path := url_base_path + "/kim.pdf"
+
+		// Save video file with custom name "video.mp4"
+		var video_url_path string
+		if variant.VideoFile != nil && variant.VideoFile.Filename != "" {
+			video_physical_path := physical_dir_path + "/video.mp4"
+			videoErr := c.SaveUploadedFile(variant.VideoFile, video_physical_path)
+			if videoErr != nil {
+				log.Println(videoErr)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка загрузки видео файла: " + videoErr.Error()})
+				return
+			}
+			video_url_path = url_base_path + "/video.mp4"
 		} else {
-			videoFilePath = path_to_variant + "/" + variant.VideoFile.Filename
+			video_url_path = ""
 		}
+		println(video_url_path, pdf_url_path)
+		// Create variant configuration for database
 		variant_config := variantconfig.VariantInfo{
 			UUID:          uuid,
 			Name:          variant.Name,
@@ -102,9 +124,10 @@ func UploadHandler(c *gin.Context) {
 			Class:         variant.Class,
 			Subject:       variant.Subject,
 			Solved:        variant.Solved,
-			PDFFilePath:   path_to_variant + "/" + variant.PDFFile.Filename,
-			VideoFilePath: videoFilePath,
+			PDFFilePath:   pdf_url_path,
+			VideoFilePath: video_url_path,
 		}
+
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 		dbErr := godb.AddVariant(ctx, &variant_config)

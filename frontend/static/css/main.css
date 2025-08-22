@@ -16,7 +16,7 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     background-color: var(--light);
     color: var(--dark);
     line-height: 1.6;
@@ -58,7 +58,7 @@ body.dark-theme header {
 .header-container {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: self-start;
     padding: 15px 0;
     position: relative;
 }
@@ -577,7 +577,7 @@ body.dark-theme footer {
     .blocks-container {
         flex-direction: column;
     }
-    
+
     nav ul {
         gap: 10px;
     }
@@ -588,34 +588,34 @@ body.dark-theme footer {
         flex-wrap: wrap;
         gap: 15px;
     }
-    
+
     nav {
         order: 3;
         width: 100%;
     }
-    
+
     nav ul {
         flex-wrap: wrap;
     }
-    
+
     .hero h1 {
         font-size: 36px;
     }
-    
+
     .hero p {
         font-size: 18px;
     }
-    
+
     .footer-container {
         flex-direction: column;
         gap: 30px;
     }
-    
+
     .settings-menu {
         width: 100%;
         right: -100%;
     }
-    
+
     .menu-grid {
         grid-template-columns: repeat(3, 1fr);
     }
@@ -626,11 +626,11 @@ body.dark-theme footer {
         flex-direction: column;
         gap: 5px;
     }
-    
+
     .menu-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .header-controls {
         flex-wrap: wrap;
         justify-content: center;
