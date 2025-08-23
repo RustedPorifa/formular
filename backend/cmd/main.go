@@ -61,8 +61,8 @@ func main() {
 	router := gin.Default()
 	//Настройка роутера
 	router.MaxMultipartMemory = 10 << 30
-	router.SetTrustedProxies(nil)
-	//router.Use(middleware.GeoIPMiddleware(db))
+	router.SetTrustedProxies([]string{"127.0.0.1"})
+	router.Use(middleware.GeoIPMiddleware(db))
 	router.LoadHTMLGlob("frontend/templates/**/*.html")
 	//statics
 	router.Static("/static", "frontend/static")

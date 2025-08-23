@@ -39,7 +39,7 @@ func AuthMiddleware() gin.HandlerFunc {
 				c.HTML(http.StatusUnauthorized, "401.html", gin.H{})
 				return
 			}
-			c.SetCookie("access_token", new_access_token, 8*60*60, "/", "127.0.0.1", false, true)
+			c.SetCookie("access_token", new_access_token, 8*60*60, "/", "formulyarka.ru", false, true)
 			c.Next()
 		} else if cookieErr != nil && !errors.Is(cookieErr, http.ErrNoCookie) {
 			log.Println(cookieErr)
@@ -59,7 +59,7 @@ func AuthMiddleware() gin.HandlerFunc {
 					c.HTML(http.StatusUnauthorized, "401.html", gin.H{})
 					return
 				}
-				c.SetCookie("access_token", new_access_token, 8*60*60, "/", "127.0.0.1", false, true)
+				c.SetCookie("access_token", new_access_token, 8*60*60, "/", "formulyarka.ru", false, true)
 				c.Next()
 			} else if jwtErr == nil {
 				c.Next()

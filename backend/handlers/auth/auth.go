@@ -52,7 +52,7 @@ func HandleVerify(c *gin.Context) {
 				c.JSON(http.StatusUnauthorized, gin.H{"verify": "false"})
 				return
 			}
-			c.SetCookie("access_token", new_access_token, 8*60*60, "/", "127.0.0.1", false, true)
+			c.SetCookie("access_token", new_access_token, 8*60*60, "/", "formulyarka.ru", true, true)
 		} else if jwtErr == nil {
 			println("else")
 			c.JSON(http.StatusAccepted, gin.H{"verify": "true"})
@@ -72,7 +72,7 @@ func HandleVerify(c *gin.Context) {
 			c.JSON(http.StatusUnauthorized, gin.H{"verify": "false"})
 			return
 		}
-		c.SetCookie("access_token", new_access_token, 8*60*60, "/", "127.0.0.1", false, true)
+		c.SetCookie("access_token", new_access_token, 8*60*60, "/", "formulyarka.ru", true, true)
 		c.JSON(http.StatusAccepted, gin.H{"verify": "true"})
 		return
 	}
@@ -195,8 +195,8 @@ func HandleLogin(c *gin.Context) {
 	}
 
 	// Устанавливаем куки и возвращаем токен
-	c.SetCookie("refresh_token", tokenRefreshString, 60*60*24*7, "/", "127.0.0.1", false, true)
-	c.SetCookie("access_token", tokenAccessString, 8*60*60, "/", "127.0.0.1", false, true)
+	c.SetCookie("refresh_token", tokenRefreshString, 60*60*24*7, "/", "formulyarka.ru", true, true)
+	c.SetCookie("access_token", tokenAccessString, 8*60*60, "/", "formulyarka", true, true)
 	c.JSON(http.StatusOK, gin.H{
 		"user": gin.H{
 			"id":   user.ID,
@@ -232,7 +232,7 @@ func HandleRefreshToken(c *gin.Context) {
 	}
 
 	// Обновляем куку с refresh token
-	c.SetCookie("refresh_token", newRefreshToken, 60*60*24*7, "/", "127.0.0.1", false, true)
+	c.SetCookie("refresh_token", newRefreshToken, 60*60*24*7, "/", "formulyarka.ru", true, true)
 
 	c.JSON(http.StatusOK, gin.H{
 		"access_token": accessToken,
@@ -284,8 +284,8 @@ func HandleEmailVerify(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка генерации токена"})
 			return
 		}
-		c.SetCookie("refresh_token", tokenRefreshString, 60*60*24*7, "/", "127.0.0.1", false, true)
-		c.SetCookie("access_token", tokenAccessString, 8*60*60, "/", "127.0.0.1", false, true)
+		c.SetCookie("refresh_token", tokenRefreshString, 60*60*24*7, "/", "formulyarka.ru", true, true)
+		c.SetCookie("access_token", tokenAccessString, 8*60*60, "/", "formulyarka.ru", true, true)
 		c.JSON(http.StatusCreated, gin.H{
 			"message":  "Регистрация успешна! Добро пожаловать!",
 			"redirect": "/",
